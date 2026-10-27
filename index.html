@@ -21,6 +21,7 @@ h2{font-size:18px;margin:0 0 10px}
 .small{font-size:14px}
 label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
 input[type=text],input[type=password],select{width:100%;padding:11px 12px;border:1px solid #c5cdd8;border-radius:9px;background:#fff;color:var(--ink)}
+input[type=number]{padding:7px 8px;border:1px solid #c5cdd8;border-radius:9px;background:#fff;color:var(--ink);width:78px;text-align:right}
 input:focus,select:focus{outline:2px solid var(--pri);outline-offset:1px;border-color:var(--pri)}
 .btn{display:inline-block;border:0;border-radius:9px;padding:11px 18px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer}
 .btn:hover{background:var(--pri-d)}
@@ -350,11 +351,11 @@ function paneRes(keepScroll){
   const nt = pane.querySelector('.tw'); if(nt && keepScroll) nt.scrollTop = sc;
 }
 function paneTests(){
-  $('#pane').innerHTML = `<div class="card"><h2>Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Holat</th><th></th></tr></thead><tbody>
-    ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n">${x.duration_min} daq</td>
+  $('#pane').innerHTML = `<div class="card"><h2>Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Test vaqti (daq)</th><th>Holat</th><th></th></tr></thead><tbody>
+    ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n"><input type="number" min="1" max="300" step="1" id="dur-${x.id}" value="${x.duration_min}"> <button class="btn sm" data-act="setdur" data-id="${x.id}">Saqlash</button></td>
     <td>${x.active ? '<span class="badge b-ok">Ochiq</span>' : '<span class="badge b-new">Yopiq</span>'}</td>
     <td><button class="btn sec sm" data-act="toggle" data-id="${x.id}" data-v="${x.active?0:1}">${x.active?'Yopish':'Ochish'}</button></td></tr>`).join('')}
-    </tbody></table></div><p class="mute small" style="margin-bottom:0">Yopiq testni o‘quvchilar ko‘rmaydi. Yangi testlar (yangi mavzular) bazaga SQL orqali qo‘shiladi.</p></div>`;
+    </tbody></table></div><p class="mute small" style="margin-bottom:0">Test vaqtini (1–300 daqiqa) har bir sinf testi uchun shu yerdan o‘zgartiring. Yangi vaqt testni yangi boshlaydigan o‘quvchilarga qo‘llanadi; allaqachon boshlaganlarning vaqti o‘zgarmaydi. Yopiq testni o‘quvchilar ko‘rmaydi. Yangi testlar (yangi mavzular) bazaga SQL orqali qo‘shiladi.</p></div>`;
 }
 function paneSet(){
   const stu = []; const seen = new Set();
@@ -419,6 +420,18 @@ document.addEventListener('click', async e => {
     case 'refresh': if(await adminLoad()) paneRes(true); break;
     case 'csv': csv(); break;
     case 'toggle': { try{ await rpc('admin_set_active', { p_user:A.u, p_password:A.p, p_test_id:Number(b.dataset.id), p_active: b.dataset.v==='1' }); await adminLoad(); }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; } viewAdmin(); break; }
+    case 'setdur': {
+      const id = Number(b.dataset.id), inp = document.getElementById('dur-' + id), m = Math.round(Number(inp && inp.value));
+      const x = A.tests.find(z => z.id === id);
+      if(!(m >= 1 && m <= 300)){ A.msg = {bad:true, t:'Vaqt 1 dan 300 daqiqagacha bo‘lsin.'}; return viewAdmin(); }
+      try{
+        const r = await rpc('admin_set_duration', { p_user:A.u, p_password:A.p, p_test_id:id, p_minutes:m });
+        if(r.ok){ await adminLoad(); A.msg = {t:`${x ? x.grade + '-sinf testi' : 'Test'}: vaqt ${m} daqiqa qilib saqlandi.`}; }
+        else A.msg = {bad:true, t: r.error==='bad_value' ? 'Vaqt 1 dan 300 daqiqagacha bo‘lsin.' : 'Saqlab bo‘lmadi.'};
+      }catch(err){
+        A.msg = {bad:true, t: String(err.message)==='http404' ? 'Bazada admin_set_duration funksiyasi yo‘q. Avval vaqt_sozlash.sql ni Supabase SQL Editor’da ishga tushiring.' : 'Aloqa xatosi'};
+      }
+      viewAdmin(); break; }
     case 'reopen': {
       const r = A.rows.find(x => String(x.student_id)===b.dataset.s && String(x.test_id)===b.dataset.t);
       confirmBox(`<b>${esc(r.surname)} ${esc(r.name)}</b> uchun testni qayta ochasizmi?<br><span class="mute small">Uning oldingi urinishi va natijasi o'chadi, u testni boshidan topshiradi.</span>`, 'Ha, qayta ochish', 'Bekor qilish', async () => {
