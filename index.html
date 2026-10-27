@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informatika testlari</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#17212e;--mute:#64748b;--line:#dbe1e9;--pri:#1b6ca8;--pri-d:#14527f;--ok:#15803d;--okbg:#e7f6ec;--bad:#b42318;--badbg:#fdecea;--warn:#a15c00;--warnbg:#fff4de;--r:12px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,input,select{font:inherit}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+.wrap.wide{max-width:1180px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:18px;letter-spacing:.2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.card+.card{margin-top:14px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:18px;margin:0 0 10px}
+.mute{color:var(--mute)}
+.small{font-size:14px}
+label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
+input[type=text],input[type=password],select{width:100%;padding:11px 12px;border:1px solid #c5cdd8;border-radius:9px;background:#fff;color:var(--ink)}
+input[type=number]{padding:7px 8px;border:1px solid #c5cdd8;border-radius:9px;background:#fff;color:var(--ink);width:78px;text-align:right}
+input:focus,select:focus{outline:2px solid var(--pri);outline-offset:1px;border-color:var(--pri)}
+.btn{display:inline-block;border:0;border-radius:9px;padding:11px 18px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--pri-d)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.sec{background:#e8edf3;color:var(--ink)}.btn.sec:hover{background:#dbe3ec}
+.btn.bad{background:var(--bad)}
+.btn.sm{padding:6px 11px;font-size:14px}
+.btn.block{width:100%;margin-top:18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
+.lang button{border:0;background:none;padding:6px 12px;cursor:pointer;font-weight:600;color:var(--mute)}
+.lang button.on{background:var(--pri);color:#fff}
+.err{background:var(--badbg);color:var(--bad);border-radius:9px;padding:10px 12px;margin-top:14px;font-size:15px}
+.note{background:var(--warnbg);color:var(--warn);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:15px}
+.link{background:none;border:0;color:var(--pri);cursor:pointer;padding:0;text-decoration:underline}
+.tcard{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:12px}
+.tcard .t{font-weight:600}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:13px;font-weight:600}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-wip{background:var(--warnbg);color:var(--warn)}.b-new{background:#e8edf3;color:var(--mute)}
+/* test */
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;padding:4px 12px;border-radius:9px;background:#e8f1f9;color:var(--pri-d)}
+.timer.low{background:var(--badbg);color:var(--bad)}
+.qno{color:var(--mute);font-size:14px;margin-bottom:6px}
+.qtext{font-size:19px;font-weight:600;margin:0 0 16px;user-select:none;-webkit-user-select:none}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px;margin-top:10px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.opt:hover{border-color:#9db9d3}
+.opt .k{flex:none;width:28px;height:28px;border-radius:50%;background:#e8edf3;display:grid;place-items:center;font-weight:700;font-size:14px}
+.opt.sel{border-color:var(--pri);background:#eaf3fb}.opt.sel .k{background:var(--pri);color:#fff}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.nav button{width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
+.nav button.ans{background:#d7eadb;border-color:#9ccaa7}
+.nav button.cur{outline:2px solid var(--pri);outline-offset:1px}
+.big{font-size:56px;font-weight:800;line-height:1.1;margin:8px 0}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.stat{flex:1;min-width:110px;border-radius:10px;padding:12px;text-align:center}
+.stat b{display:block;font-size:24px}
+.s-ok{background:var(--okbg);color:var(--ok)}.s-bad{background:var(--badbg);color:var(--bad)}.s-n{background:#e8f1f9;color:var(--pri-d)}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:grid;place-items:center;padding:16px;z-index:10}
+.modal .box{background:#fff;border-radius:14px;padding:22px;max-width:440px;width:100%}
+/* admin */
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tabs button{border:0;background:#e8edf3;border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--pri);color:#fff}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
+.filters>div{min-width:150px}.filters label{margin:0 0 4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.chip{background:#e8f1f9;color:var(--pri-d);border-radius:99px;padding:3px 12px;font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:#f0f3f7;position:sticky;top:0;font-size:13px;text-transform:uppercase;letter-spacing:.3px;color:var(--mute)}
+.tw{overflow:auto;max-height:68vh;border:1px solid var(--line);border-radius:10px}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.g5{color:var(--ok);font-weight:700}.g2{color:var(--bad);font-weight:700}
+@media (max-width:560px){.qtext{font-size:17px}.big{font-size:44px}}
+@media print{.top,.tabs,.filters,.btn{display:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+/* ====================== SOZLAMA ======================
+   Supabase > Project Settings > API dan oling:
+   URL  = "Project URL"
+   KEY  = "anon public" (yoki "publishable") kalit.  service_role kalitini BU YERGA QO'YMANG! */
+const CFG = { URL: 'https://ywzikqgtmrkzjgvhsvsg.supabase.co', KEY: 'sb_publishable_8dt1_BmkmKLzDQXSsJGpxg_LqA3JnB9' };
+
+/* ====================== YORDAMCHILAR ====================== */
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mem = {};
+const ss = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return mem[k] ?? null; } },
+             set(k,v){ try{ sessionStorage.setItem(k,v); }catch(e){ mem[k]=v; } },
+             del(k){ try{ sessionStorage.removeItem(k); }catch(e){ delete mem[k]; } } };
+const ls = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return mem['ls'+k] ?? null; } },
+             set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem['ls'+k]=v; } } };
+
+async function rpc(fn, args){
+  const h = { 'Content-Type':'application/json', 'apikey': CFG.KEY };
+  if (CFG.KEY.startsWith('eyJ')) h['Authorization'] = 'Bearer ' + CFG.KEY;
+  let r;
+  try { r = await fetch(CFG.URL.replace(/\/+$/,'') + '/rest/v1/rpc/' + fn, { method:'POST', headers:h, body: JSON.stringify(args) }); }
+  catch(e){ throw new Error('net'); }
+  if (!r.ok) throw new Error('http' + r.status);
+  return r.json();
+}
+const configured = () => /^https?:\/\//.test(CFG.URL) && CFG.KEY && !CFG.KEY.startsWith('PASTE');
+
+/* ====================== TIL ====================== */
+const T = {
+ kk:{ title:'Информатика тесті', login:'Логин', password:'Құпиясөз', signin:'Кіру', teacher:'Мұғалім үшін кіру', bad:'Логин немесе құпиясөз қате',
+  hello:'Сәлем', tests:'Қолжетімді тестер', none:'Қазір қолжетімді тест жоқ.', start:'Бастау', cont:'Жалғастыру', done:'Тапсырылды',
+  min:'мин', qs:'сұрақ', left:'Қалған уақыт', prev:'Алдыңғы', next:'Келесі', finish:'Аяқтау',
+  askFinish:'Тестті аяқтайсыз ба?', unans:'Жауап берілмеген сұрақтар', yes:'Иә, аяқтау', no:'Жоқ, жалғастыру',
+  result:'Нәтиже', correct:'Дұрыс', wrong:'Қате', percent:'Пайыз', out:'Дұрыс жауап', logout:'Шығу',
+  askStart:'Тест басталғаннан кейін таймер тоқтамайды. Бастаймыз ба?', cancel:'Бас тарту',
+  net:'Байланыс қатесі. Интернетті тексеріп, қайталап көріңіз.', retry:'Қайталау', timeup:'Уақыт бітті. Жауаптар жіберілуде…',
+  q:'Сұрақ', saving:'Жіберілуде…', already:'Сіз бұл тестті тапсырып қойдыңыз.', nt:'Бұл тест қазір қолжетімді емес.', loading:'Жүктелуде…', noq:'Бұл тестте сұрақтар жоқ.',
+  setup:'Сайт бапталмаған.' },
+ uz:{ title:'Informatika testi', login:'Login', password:'Parol', signin:'Kirish', teacher:"O'qituvchi uchun kirish", bad:"Login yoki parol noto'g'ri",
+  hello:'Salom', tests:'Mavjud testlar', none:"Hozircha mavjud test yo'q.", start:'Boshlash', cont:'Davom etish', done:'Topshirilgan',
+  min:'daq', qs:'savol', left:'Qolgan vaqt', prev:'Oldingi', next:'Keyingi', finish:'Yakunlash',
+  askFinish:'Testni yakunlaysizmi?', unans:'Javob berilmagan savollar', yes:'Ha, yakunlash', no:'Yo‘q, davom etaman',
+  result:'Natija', correct:"To'g'ri", wrong:"Noto'g'ri", percent:'Foiz', out:"To'g'ri javoblar", logout:'Chiqish',
+  askStart:"Test boshlangach taymer to'xtamaydi. Boshlaymizmi?", cancel:'Bekor qilish',
+  net:"Aloqa xatosi. Internetni tekshirib, qayta urinib ko'ring.", retry:'Qayta urinish', timeup:'Vaqt tugadi. Javoblar yuborilmoqda…',
+  q:'Savol', saving:'Yuborilmoqda…', already:'Siz bu testni topshirib bo‘lgansiz.', nt:'Bu test hozir mavjud emas.', loading:'Yuklanmoqda…', noq:"Bu testda savollar yo'q.",
+  setup:'Sayt sozlanmagan.' }
+};
+let lang = ls.get('lang') === 'uz' ? 'uz' : 'kk';
+const t = k => T[lang][k];
+function langSwitch(){
+  return `<div class="lang"><button data-act="lang" data-v="kk" class="${lang==='kk'?'on':''}">Қазақша</button><button data-act="lang" data-v="uz" class="${lang==='uz'?'on':''}">O'zbekcha</button></div>`;
+}
+
+/* ====================== HOLAT ====================== */
+const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null };
+const A = { u:null, p:null, rows:[], tests:[], cd:[], tab:'res', f:{ test:'', cls:'', grp:'' }, poll:null, msg:null };
+
+function clearTimers(){ if(S.timer){clearInterval(S.timer);S.timer=null;} if(A.poll){clearInterval(A.poll);A.poll=null;} }
+function fmt(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+const stTitle = x => lang==='uz' ? x.title_uz : x.title_kk;
+function setupBanner(){ return configured() ? '' : `<div class="note"><b>${t('setup')}</b> index.html ichida <code>CFG</code> (URL va KEY) ni to'ldiring.</div>`; }
+
+/* ====================== LOGIN ====================== */
+function viewLogin(err){
+  clearTimers(); S.att=null;
+  app.className = 'wrap';
+  app.innerHTML = `
+  <div class="top"><div class="brand">${t('title')}</div>${langSwitch()}</div>
+  ${setupBanner()}
+  <form class="card" id="f-login" autocomplete="off">
+    <h1>${t('title')}</h1>
+    <label for="lg">${t('login')}</label>
+    <input type="text" id="lg" autocapitalize="none" autocomplete="off" spellcheck="false" required>
+    <label for="pw">${t('password')}</label>
+    <input type="password" id="pw" autocomplete="off" required>
+    ${err ? `<div class="err">${esc(err)}</div>` : ''}
+    <button class="btn block" type="submit">${t('signin')}</button>
+  </form>
+  <p class="small" style="text-align:center;margin-top:18px"><button class="link" data-act="to-admin">${t('teacher')}</button></p>`;
+  $('#lg').focus();
+}
+const $ = (s,r=document) => r.querySelector(s);
+
+async function doLogin(login, pw){
+  const btn = $('#f-login button[type=submit]'); if(btn){ btn.disabled = true; btn.textContent = t('loading'); }
+  try{
+    const r = await rpc('student_login', { p_login: login, p_password: pw });
+    if(!r.ok){ return viewLogin(t('bad')); }
+    S.creds = { l: login.trim().toLowerCase(), p: pw }; ss.set('cr', JSON.stringify(S.creds));
+    S.student = r.student; S.tests = r.tests; viewHome();
+  }catch(e){ viewLogin(t('net')); }
+}
+
+/* ====================== BOSH SAHIFA ====================== */
+function viewHome(msg){
+  clearTimers(); S.att = null;
+  app.className = 'wrap';
+  const s = S.student;
+  const cards = S.tests.map(x => {
+    const badge = x.status==='done' ? `<span class="badge b-ok">${t('done')}</span>` : x.status==='in_progress' ? `<span class="badge b-wip">${t('cont')}</span>` : '';
+    let right;
+    if (x.status==='done') right = `<div class="mute">${t('out')}: <b>${x.correct} / ${x.total}</b></div>`;
+    else right = `<button class="btn" data-act="start" data-id="${x.id}">${x.status==='in_progress'?t('cont'):t('start')}</button>`;
+    return `<div class="tcard"><div><div class="t">${esc(stTitle(x))}</div>
+      <div class="mute small">${x.question_count} ${t('qs')} · ${x.duration_min} ${t('min')} ${badge}</div></div>${right}</div>`;
+  }).join('');
+  app.innerHTML = `
+  <div class="top"><div class="brand">${t('title')}</div><div class="row">${langSwitch()}<button class="btn sec sm" data-act="logout">${t('logout')}</button></div></div>
+  <div class="card"><h1>${t('hello')}, ${esc(s.name)} ${esc(s.surname)}!</h1><div class="mute">${esc(s.class)}</div>
+  ${msg ? `<div class="err">${esc(msg)}</div>` : ''}
+  <h2 style="margin-top:20px">${t('tests')}</h2>${cards || `<p class="mute">${t('none')}</p>`}</div>`;
+}
+
+function confirmBox(text, yes, no, onYes){
+  const m = document.createElement('div'); m.className='modal';
+  m.innerHTML = `<div class="box"><p style="margin-top:0;font-size:17px">${text}</p><div class="row" style="justify-content:flex-end"><button class="btn sec" data-m="no">${no}</button><button class="btn" data-m="yes">${yes}</button></div></div>`;
+  m.addEventListener('click', e => { const b = e.target.closest('[data-m]'); if(!b) return; m.remove(); if(b.dataset.m==='yes') onYes(); });
+  document.body.appendChild(m);
+}
+
+async function startTest(id){
+  const x = S.tests.find(z => z.id === id); if(!x) return;
+  const go = async () => {
+    app.innerHTML = `<div class="card">${t('loading')}</div>`;
+    try{
+      const r = await rpc('student_start', { p_login: S.creds.l, p_password: S.creds.p, p_test_id: id });
+      if(!r.ok){ return viewHome(r.error==='no_test' ? t('nt') : r.error==='no_questions' ? t('noq') : t('bad')); }
+      if(r.done){ S.result = r.result; return viewResult(); }
+      S.att = r; S.ans = r.answers || {}; S.idx = 0;
+      S.deadline = Date.parse(r.deadline) - (Date.parse(r.server_now) - Date.now());
+      viewTest();
+      S.timer = setInterval(tick, 500);
+    }catch(e){ viewHome(t('net')); }
+  };
+  if (x.status === 'in_progress') go(); else confirmBox(esc(t('askStart')), t('start'), t('cancel'), go);
+}
+
+/* ====================== TEST ====================== */
+function tick(){
+  const el = $('#tm'); const left = Math.ceil((S.deadline - Date.now())/1000);
+  if(el){ el.textContent = fmt(left); el.classList.toggle('low', left <= 120); }
+  if(left <= 0 && !S.busy){ finish(true); }
+}
+function viewTest(){
+  app.className = 'wrap';
+  const a = S.att, q = a.questions[S.idx], n = a.questions.length;
+  const opts = (lang==='uz' ? q.opts_uz : q.opts_kk).map((o,i) =>
+    `<button class="opt ${S.ans[q.id]===i?'sel':''}" data-act="pick" data-i="${i}"><span class="k">${'ABCDEFGH'[i]}</span><span>${esc(o)}</span></button>`).join('');
+  const nav = a.questions.map((z,i) => `<button data-act="go" data-i="${i}" class="${S.ans[z.id]!==undefined?'ans':''} ${i===S.idx?'cur':''}">${i+1}</button>`).join('');
+  app.innerHTML = `
+  <div class="top"><div class="brand">${esc(lang==='uz'?a.title_uz:a.title_kk)}</div>
+    <div class="row">${langSwitch()}<span class="timer" id="tm">--:--</span></div></div>
+  <div class="card">
+    <div class="qno">${t('q')} ${S.idx+1} / ${n}</div>
+    <p class="qtext">${esc(lang==='uz'?q.q_uz:q.q_kk)}</p>
+    ${opts}
+    <div class="row" style="margin-top:20px">
+      <button class="btn sec" data-act="prev" ${S.idx===0?'disabled':''}>← ${t('prev')}</button>
+      <div class="sp"></div>
+      ${S.idx<n-1 ? `<button class="btn" data-act="next">${t('next')} →</button>` : `<button class="btn" data-act="finish">${t('finish')}</button>`}
+    </div>
+  </div>
+  <div class="card"><div class="row"><b>${Object.keys(S.ans).length} / ${n}</b><div class="sp"></div><button class="btn sec sm" data-act="finish">${t('finish')}</button></div><div class="nav">${nav}</div></div>`;
+  tick();
+}
+function queueSave(){
+  clearTimeout(S.saveT);
+  S.saveT = setTimeout(() => { if(S.att) rpc('student_save', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans }).catch(()=>{}); }, 500);
+}
+function askFinish(){
+  const n = S.att.questions.length, un = n - Object.keys(S.ans).length;
+  const txt = `<b>${t('askFinish')}</b>` + (un>0 ? `<br><span class="mute">${t('unans')}: ${un}</span>` : '');
+  confirmBox(txt, t('yes'), t('no'), () => finish(false));
+}
+async function finish(auto){
+  if(S.busy) return; S.busy = true; clearInterval(S.timer); S.timer = null; clearTimeout(S.saveT);
+  document.querySelectorAll('.modal').forEach(m => m.remove());
+  app.innerHTML = `<div class="card"><h2>${auto ? t('timeup') : t('saving')}</h2></div>`;
+  try{
+    const r = await rpc('student_submit', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans });
+    if(!r.ok) throw new Error('x');
+    S.busy = false; S.result = r.result; S.att = null; viewResult();
+  }catch(e){
+    S.busy = false;
+    app.innerHTML = `<div class="card"><div class="err">${t('net')}</div><button class="btn block" data-act="retry-submit">${t('retry')}</button></div>`;
+  }
+}
+function viewResult(){
+  clearTimers(); const r = S.result;
+  app.className = 'wrap';
+  app.innerHTML = `
+  <div class="top"><div class="brand">${t('title')}</div>${langSwitch()}</div>
+  <div class="card" style="text-align:center"><h1>${t('result')}</h1>
+    <div class="big">${r.correct} / ${r.total}</div>
+    <div class="stats"><div class="stat s-ok"><b>${r.correct}</b>${t('correct')}</div><div class="stat s-bad"><b>${r.wrong}</b>${t('wrong')}</div><div class="stat s-n"><b>${r.percent}%</b>${t('percent')}</div></div>
+    <button class="btn block" data-act="logout">${t('logout')}</button></div>`;
+}
+
+/* ====================== ADMIN ====================== */
+function viewAdminLogin(err){
+  clearTimers();
+  app.className = 'wrap';
+  app.innerHTML = `
+  <div class="top"><div class="brand">O'qituvchi paneli</div></div>
+  ${setupBanner()}
+  <form class="card" id="f-admin" autocomplete="off"><h1>O'qituvchi kirishi</h1>
+    <label for="au">Login</label><input type="text" id="au" autocapitalize="none" autocomplete="off" required>
+    <label for="ap">Parol</label><input type="password" id="ap" autocomplete="off" required>
+    ${err ? `<div class="err">${esc(err)}</div>` : ''}
+    <button class="btn block" type="submit">Kirish</button></form>
+  <p class="small" style="text-align:center;margin-top:18px"><button class="link" data-act="to-student">← O'quvchi kirishi</button></p>`;
+  $('#au').focus();
+}
+async function adminLoad(){
+  try{
+    const r = await rpc('admin_results', { p_user:A.u, p_password:A.p });
+    if(!r.ok){ A.u = A.p = null; return viewAdminLogin('Login yoki parol noto‘g‘ri'); }
+    A.rows = r.rows; A.tests = r.tests; A.cd = r.class_durations || [];
+    if(!A.f.test && A.tests.length) A.f.test = String(A.tests[0].id);
+    return true;
+  }catch(e){ A.msg = {bad:true, t:"Aloqa xatosi. Internetni tekshiring."}; return false; }
+}
+function baho(c,tot){ if(!tot) return ''; const p = 100*c/tot; return p>=86?5 : p>=71?4 : p>=55?3 : 2; }
+function viewAdmin(){
+  clearTimers();
+  app.className = 'wrap wide';
+  const tabs = [['res','Natijalar'],['tests','Testlar'],['set','Sozlamalar']].map(([k,n]) => `<button data-act="atab" data-v="${k}" class="${A.tab===k?'on':''}">${n}</button>`).join('');
+  app.innerHTML = `<div class="top"><div class="brand">O'qituvchi paneli · ${esc(A.u)}</div><button class="btn sec sm" data-act="alogout">Chiqish</button></div>
+    <div class="tabs">${tabs}</div>${A.msg ? `<div class="${A.msg.bad?'err':'note'}" style="margin-top:0;margin-bottom:12px">${esc(A.msg.t)}</div>` : ''}<div id="pane"></div>`;
+  A.msg = null;
+  if(A.tab==='res'){ paneRes(); A.poll = setInterval(async () => { if(await adminLoad()) { paneRes(true); } }, 30000); }
+  else if(A.tab==='tests') paneTests(); else paneSet();
+}
+function paneRes(keepScroll){
+  const pane = $('#pane'); if(!pane) return;
+  const tw = pane.querySelector('.tw'), sc = tw ? tw.scrollTop : 0;
+  const test = A.tests.find(x => String(x.id)===A.f.test);
+  let rows = A.rows.filter(r => String(r.test_id)===A.f.test);
+  const classes = [...new Set(rows.map(r => r.class))].sort();
+  const groups = [...new Set(rows.filter(r => !A.f.cls || r.class===A.f.cls).map(r => r.grp))].sort();
+  if(A.f.cls) rows = rows.filter(r => r.class===A.f.cls);
+  if(A.f.grp) rows = rows.filter(r => String(r.grp)===A.f.grp);
+  const done = rows.filter(r => r.status==='done'), wip = rows.filter(r => r.status==='in_progress'), nw = rows.filter(r => r.status==='new');
+  const avg = done.length ? Math.round(done.reduce((s,r) => s + 100*r.correct/r.total, 0) / done.length) : 0;
+  const body = rows.map((r,i) => {
+    const b = r.status==='done' ? baho(r.correct, r.total) : '';
+    const st = r.status==='done' ? '<span class="badge b-ok">Topshirdi</span>' : r.status==='in_progress' ? '<span class="badge b-wip">Jarayonda</span>' : '<span class="badge b-new">Boshlamadi</span>';
+    return `<tr><td class="n">${i+1}</td><td>${esc(r.surname)} ${esc(r.name)}</td><td>${esc(r.class)}</td><td>${r.grp ?? ''}</td><td>${st}</td>
+      <td class="n">${r.status==='done' ? r.correct+' / '+r.total : ''}</td><td class="n">${r.status==='done' ? Math.round(100*r.correct/r.total)+'%' : ''}</td>
+      <td class="n ${b===5?'g5':b===2?'g2':''}">${b}</td>
+      <td>${r.status!=='new' ? `<button class="btn sec sm" data-act="reopen" data-s="${r.student_id}" data-t="${r.test_id}">Qayta ochish</button>` : ''}</td></tr>`;
+  }).join('');
+  pane.innerHTML = `<div class="card">
+    <div class="filters">
+      <div><label>Test</label><select data-f="test">${A.tests.map(x => `<option value="${x.id}" ${String(x.id)===A.f.test?'selected':''}>${esc(x.title_uz)}</option>`).join('')}</select></div>
+      <div><label>Sinf</label><select data-f="cls"><option value="">Hammasi</option>${classes.map(c => `<option ${c===A.f.cls?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+      <div><label>Guruh</label><select data-f="grp"><option value="">Hammasi</option>${groups.map(g => `<option ${String(g)===A.f.grp?'selected':''}>${g}</option>`).join('')}</select></div>
+      <button class="btn sec" data-act="refresh">Yangilash</button><button class="btn" data-act="csv">Excel (CSV)</button>
+    </div>
+    <div class="chips"><span class="chip">Jami: ${rows.length}</span><span class="chip">Topshirdi: ${done.length}</span><span class="chip">Jarayonda: ${wip.length}</span><span class="chip">Boshlamadi: ${nw.length}</span><span class="chip">O'rtacha: ${avg}%</span></div>
+    ${test ? '' : '<p class="mute">Test yo‘q.</p>'}
+    <div class="tw"><table><thead><tr><th>№</th><th>F.I.Sh</th><th>Sinf</th><th>Guruh</th><th>Holat</th><th>To‘g‘ri</th><th>Foiz</th><th>Baho</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+    <p class="mute small" style="margin-bottom:0">Baho: 86–100% → 5, 71–85% → 4, 55–70% → 3, qolgani → 2. Jadval har 30 soniyada yangilanadi.</p></div>`;
+  const nt = pane.querySelector('.tw'); if(nt && keepScroll) nt.scrollTop = sc;
+}
+function paneTests(){
+  $('#pane').innerHTML = `<div class="card"><h2>Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Umumiy vaqt (daq)</th><th>Holat</th><th></th></tr></thead><tbody>
+    ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n"><input type="number" min="1" max="300" step="1" id="dur-${x.id}" value="${x.duration_min}"> <button class="btn sm" data-act="setdur" data-id="${x.id}">Saqlash</button></td>
+    <td>${x.active ? '<span class="badge b-ok">Ochiq</span>' : '<span class="badge b-new">Yopiq</span>'}</td>
+    <td><button class="btn sec sm" data-act="toggle" data-id="${x.id}" data-v="${x.active?0:1}">${x.active?'Yopish':'Ochish'}</button></td></tr>`).join('')}
+    </tbody></table></div><p class="mute small" style="margin-bottom:0">Umumiy vaqt — alohida vaqt qo‘yilmagan barcha sinflar uchun. Yopiq testni o‘quvchilar ko‘rmaydi. Yangi testlar (yangi mavzular) bazaga SQL orqali qo‘shiladi.</p></div>${classDurCard()}`;
+}
+function classDurCard(){
+  const pairs = [], seen = new Set();
+  for(const r of A.rows){ const k = r.test_id + '|' + r.class; if(!seen.has(k)){ seen.add(k); pairs.push({ t:r.test_id, c:r.class }); } }
+  pairs.sort((a,b) => a.c.localeCompare(b.c) || a.t - b.t);
+  const body = pairs.map(p => {
+    const x = A.tests.find(z => z.id === p.t); if(!x) return '';
+    const o = (A.cd || []).find(c => c.test_id === p.t && c.class === p.c);
+    const key = p.t + '_' + p.c, eff = o ? o.duration_min : x.duration_min;
+    return `<tr><td><b>${esc(p.c)}</b></td><td>${esc(x.title_uz)}</td>
+      <td class="n"><input type="number" min="1" max="300" step="1" id="cd-${esc(key)}" value="${eff}"> <button class="btn sm" data-act="setcdur" data-id="${p.t}" data-c="${esc(p.c)}">Saqlash</button></td>
+      <td>${o ? '<span class="badge b-wip">Alohida</span>' : '<span class="badge b-new">Umumiy</span>'}</td>
+      <td>${o ? `<button class="btn sec sm" data-act="rstcdur" data-id="${p.t}" data-c="${esc(p.c)}">Umumiyga qaytarish</button>` : ''}</td></tr>`;
+  }).join('');
+  return `<div class="card"><h2>Test vaqti — sinflar bo‘yicha</h2><div class="tw"><table><thead><tr><th>Sinf</th><th>Test</th><th>Vaqt (daq)</th><th>Holat</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
+  <p class="mute small" style="margin-bottom:0">Har bir sinf (7A, 7B, 9A, 9B) uchun vaqtni alohida belgilash mumkin (1–300 daqiqa). Yangi vaqt testni yangi boshlaydigan o‘quvchilarga qo‘llanadi; testni allaqachon boshlaganlarning vaqti o‘zgarmaydi.</p></div>`;
+}
+function paneSet(){
+  const stu = []; const seen = new Set();
+  for(const r of A.rows){ if(!seen.has(r.student_id)){ seen.add(r.student_id); stu.push(r); } }
+  stu.sort((a,b) => (a.class+a.surname+a.name).localeCompare(b.class+b.surname+b.name));
+  $('#pane').innerHTML = `
+  <div class="card"><h2>O'quvchi parolini o'zgartirish</h2>
+    <label>O'quvchi</label><select id="sp-s">${stu.map(s => `<option value="${s.student_id}">${esc(s.class)} · ${esc(s.surname)} ${esc(s.name)} (${esc(s.login)})</option>`).join('')}</select>
+    <label>Yangi parol (kamida 4 belgi)</label><input type="text" id="sp-p" autocomplete="off">
+    <button class="btn block" data-act="setpw">Parolni saqlash</button></div>
+  <div class="card"><h2>O'zingizning (admin) parolingiz</h2>
+    <label>Yangi parol (kamida 6 belgi)</label><input type="password" id="ap1" autocomplete="new-password">
+    <label>Yana bir bor</label><input type="password" id="ap2" autocomplete="new-password">
+    <button class="btn block" data-act="chpw">Admin parolini o'zgartirish</button></div>`;
+}
+function csv(){
+  const rows = A.rows.filter(r => String(r.test_id)===A.f.test && (!A.f.cls || r.class===A.f.cls) && (!A.f.grp || String(r.grp)===A.f.grp));
+  const test = A.tests.find(x => String(x.id)===A.f.test);
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const lines = [['№','Familiya','Ism','Sinf','Guruh','Login','Holat','To\'g\'ri','Jami','Foiz','Baho'].map(q).join(',')];
+  rows.forEach((r,i) => lines.push([i+1,r.surname,r.name,r.class,r.grp,r.login,{done:'Topshirdi',in_progress:'Jarayonda',new:'Boshlamadi'}[r.status],
+    r.correct ?? '', r.total ?? '', r.status==='done' ? Math.round(100*r.correct/r.total) : '', r.status==='done' ? baho(r.correct,r.total) : ''].map(q).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'natijalar_' + (A.f.cls || 'hammasi') + '_test' + (test ? test.id : '') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ====================== HODISALAR ====================== */
+document.addEventListener('submit', async e => {
+  e.preventDefault();
+  if(e.target.id==='f-login') return doLogin($('#lg').value, $('#pw').value);
+  if(e.target.id==='f-admin'){
+    const u = $('#au').value.trim(), p = $('#ap').value; const b = $('#f-admin button'); b.disabled = true;
+    try{ const r = await rpc('admin_login', { p_user:u, p_password:p });
+      if(!r.ok) return viewAdminLogin('Login yoki parol noto‘g‘ri');
+      A.u = u.toLowerCase(); A.p = p; ss.set('ad', JSON.stringify({u:A.u,p})); if(await adminLoad()) viewAdmin(); else viewAdmin();
+    }catch(err){ viewAdminLogin("Aloqa xatosi. Internetni tekshiring."); }
+  }
+});
+document.addEventListener('change', e => {
+  const f = e.target.dataset && e.target.dataset.f; if(!f) return;
+  A.f[f] = e.target.value; if(f==='cls') A.f.grp = ''; paneRes();
+});
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if(!b) return; const act = b.dataset.act;
+  switch(act){
+    case 'lang': lang = b.dataset.v; ls.set('lang', lang);
+      if(S.att) viewTest(); else if(S.result && $('.big')) viewResult(); else if(S.student && S.creds) viewHome(); else viewLogin(); break;
+    case 'to-admin': viewAdminLogin(); break;
+    case 'to-student': viewLogin(); break;
+    case 'logout': S.creds = null; S.student = null; S.result = null; ss.del('cr'); viewLogin(); break;
+    case 'start': startTest(Number(b.dataset.id)); break;
+    case 'pick': { const q = S.att.questions[S.idx]; S.ans[q.id] = Number(b.dataset.i); queueSave(); viewTest(); break; }
+    case 'go': S.idx = Number(b.dataset.i); viewTest(); break;
+    case 'prev': if(S.idx>0){ S.idx--; viewTest(); } break;
+    case 'next': if(S.idx < S.att.questions.length-1){ S.idx++; viewTest(); } break;
+    case 'finish': askFinish(); break;
+    case 'retry-submit': finish(false); break;
+    // admin
+    case 'alogout': A.u = A.p = null; ss.del('ad'); viewAdminLogin(); break;
+    case 'atab': A.tab = b.dataset.v; viewAdmin(); break;
+    case 'refresh': if(await adminLoad()) paneRes(true); break;
+    case 'csv': csv(); break;
+    case 'toggle': { try{ await rpc('admin_set_active', { p_user:A.u, p_password:A.p, p_test_id:Number(b.dataset.id), p_active: b.dataset.v==='1' }); await adminLoad(); }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; } viewAdmin(); break; }
+    case 'setdur': case 'setcdur': case 'rstcdur': {
+      const id = Number(b.dataset.id), cls = b.dataset.c || null;
+      const x = A.tests.find(z => z.id === id);
+      let m = null;
+      if(act !== 'rstcdur'){
+        const inp = document.getElementById(cls ? 'cd-' + id + '_' + cls : 'dur-' + id);
+        m = Math.round(Number(inp && inp.value));
+        if(!(m >= 1 && m <= 300)){ A.msg = {bad:true, t:'Vaqt 1 dan 300 daqiqagacha bo‘lsin.'}; return viewAdmin(); }
+      }
+      try{
+        const r = await rpc('admin_set_duration', { p_user:A.u, p_password:A.p, p_test_id:id, p_class:cls, p_minutes:m });
+        if(r.ok){ await adminLoad();
+          A.msg = {t: act==='rstcdur' ? `${cls}: umumiy vaqtga qaytarildi.` : cls ? `${cls}: test vaqti ${m} daqiqa qilib saqlandi.` : `${x ? x.title_uz : 'Test'}: umumiy vaqt ${m} daqiqa qilib saqlandi.`}; }
+        else A.msg = {bad:true, t: r.error==='bad_value' ? 'Vaqt 1 dan 300 daqiqagacha bo‘lsin.' : 'Saqlab bo‘lmadi.'};
+      }catch(err){
+        A.msg = {bad:true, t: String(err.message)==='http404' ? 'Bazada yangi funksiya yo‘q. Avval 03_vaqt.sql ni Supabase SQL Editor’da ishga tushiring.' : 'Aloqa xatosi'};
+      }
+      viewAdmin(); break; }
+    case 'reopen': {
+      const r = A.rows.find(x => String(x.student_id)===b.dataset.s && String(x.test_id)===b.dataset.t);
+      confirmBox(`<b>${esc(r.surname)} ${esc(r.name)}</b> uchun testni qayta ochasizmi?<br><span class="mute small">Uning oldingi urinishi va natijasi o'chadi, u testni boshidan topshiradi.</span>`, 'Ha, qayta ochish', 'Bekor qilish', async () => {
+        try{ await rpc('admin_reopen', { p_user:A.u, p_password:A.p, p_student_id:Number(b.dataset.s), p_test_id:Number(b.dataset.t) }); await adminLoad(); A.msg={t:`${r.surname} ${r.name}: test qayta ochildi.`}; }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; }
+        viewAdmin(); });
+      break; }
+    case 'setpw': {
+      const id = Number($('#sp-s').value), p = $('#sp-p').value.trim();
+      try{ const r = await rpc('admin_set_student_password', { p_user:A.u, p_password:A.p, p_student_id:id, p_new:p });
+        A.msg = r.ok ? {t:'Parol o‘zgartirildi.'} : {bad:true,t: r.error==='too_short' ? 'Parol juda qisqa.' : 'Xatolik.'}; }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; }
+      viewAdmin(); break; }
+    case 'chpw': {
+      const p1 = $('#ap1').value, p2 = $('#ap2').value;
+      if(p1 !== p2){ A.msg={bad:true,t:'Ikkala parol bir xil emas.'}; return viewAdmin(); }
+      try{ const r = await rpc('admin_change_password', { p_user:A.u, p_password:A.p, p_new:p1 });
+        if(r.ok){ A.p = p1; ss.set('ad', JSON.stringify({u:A.u,p:p1})); A.msg={t:'Admin paroli o‘zgartirildi.'}; } else A.msg={bad:true,t: r.error==='too_short' ? 'Parol kamida 6 belgi bo‘lsin.' : 'Xatolik.'}; }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; }
+      viewAdmin(); break; }
+  }
+});
+window.addEventListener('beforeunload', e => { if(S.att){ e.preventDefault(); e.returnValue = ''; } });
+
+/* ====================== BOSHLANISH ====================== */
+(async function init(){
+  try{
+    const ad = JSON.parse(ss.get('ad') || 'null');
+    if(ad && ad.u){ A.u = ad.u; A.p = ad.p; app.innerHTML = '<div class="card">…</div>'; if(await adminLoad()){ return viewAdmin(); } }
+    const cr = JSON.parse(ss.get('cr') || 'null');
+    if(cr && cr.l){ const r = await rpc('student_login', { p_login: cr.l, p_password: cr.p });
+      if(r.ok){ S.creds = cr; S.student = r.student; S.tests = r.tests; return viewHome(); } }
+  }catch(e){}
+  viewLogin();
+})();
+</script>
+</body>
+</html>
