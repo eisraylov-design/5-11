@@ -3,80 +3,163 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Informatika testlari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+<script>
+/* Mavzu (yorug' / qorong'i) sahifa chizilishidan oldin qo'yiladi, miltillamasligi uchun */
+try{ var th = localStorage.getItem('theme'); if(!th) th = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; document.documentElement.dataset.theme = th; }
+catch(e){ document.documentElement.dataset.theme = 'light'; }
+</script>
 <style>
-:root{--bg:#f3f5f8;--card:#fff;--ink:#17212e;--mute:#64748b;--line:#dbe1e9;--pri:#1b6ca8;--pri-d:#14527f;--ok:#15803d;--okbg:#e7f6ec;--bad:#b42318;--badbg:#fdecea;--warn:#a15c00;--warnbg:#fff4de;--r:12px}
+:root{
+  --bg:#F1F3EF;--surface:#FFFFFF;--ink:#10181F;--mute:#5A6670;--line:#D2D8D1;--soft:#E7EAE5;
+  --pri:#2146C7;--pri-d:#17339A;--pri-t:#E6ECFB;--on-pri:#FFFFFF;
+  --ok:#0B7A55;--ok-t:#DDF2E8;--bad:#B3261E;--bad-t:#FBE6E3;--on-bad:#FFFFFF;--warn:#8A4F00;--warn-t:#FFEFD2;
+  --grid:rgba(16,24,31,.05);--sh:0 14px 44px rgba(16,24,31,.22);--r:8px;
+}
+[data-theme=dark]{
+  --bg:#0D1318;--surface:#151D25;--ink:#E7EDF1;--mute:#9AA7B1;--line:#2B3742;--soft:#1D2832;
+  --pri:#7C9CFF;--pri-d:#AFC1FF;--pri-t:#1B2745;--on-pri:#0D1318;
+  --ok:#4FD1A0;--ok-t:#12332A;--bad:#FF8A80;--bad-t:#3A1B19;--on-bad:#3A0B08;--warn:#F5B454;--warn-t:#3A2B10;
+  --grid:rgba(231,237,241,.045);--sh:0 14px 44px rgba(0,0,0,.6);
+}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-button,input,select{font:inherit}
-.wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+html{background:var(--bg);color-scheme:light}
+[data-theme=dark]{color-scheme:dark}
+body{margin:0;color:var(--ink);background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px;
+  font:400 16px/1.55 "Noto Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;padding:16px 16px 56px}
 .wrap.wide{max-width:1180px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.brand{font-weight:700;font-size:18px;letter-spacing:.2px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px}
-.card+.card{margin-top:14px}
-h1{font-size:22px;margin:0 0 4px}
-h2{font-size:18px;margin:0 0 10px}
-.mute{color:var(--mute)}
-.small{font-size:14px}
-label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
-input[type=text],input[type=password],select{width:100%;padding:11px 12px;border:1px solid #c5cdd8;border-radius:9px;background:#fff;color:var(--ink)}
-input:focus,select:focus{outline:2px solid var(--pri);outline-offset:1px;border-color:var(--pri)}
-.btn{display:inline-block;border:0;border-radius:9px;padding:11px 18px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer}
-.btn:hover{background:var(--pri-d)}
-.btn:disabled{opacity:.55;cursor:default}
-.btn.sec{background:#e8edf3;color:var(--ink)}.btn.sec:hover{background:#dbe3ec}
-.btn.bad{background:var(--bad)}
-.btn.sm{padding:6px 11px;font-size:14px}
-.btn.block{width:100%;margin-top:18px}
+.wrap.testw{max-width:1040px}
+.narrow{max-width:440px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 14px;margin-bottom:10px;flex-wrap:wrap}
+.top.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:nowrap}
+.top.sticky .brand{min-width:0}
+.top.sticky .brand span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.01em}
+.logo{color:var(--pri);flex:none}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row.tools{gap:8px;flex-wrap:nowrap}
 .sp{flex:1}
-.lang{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}
-.lang button{border:0;background:none;padding:6px 12px;cursor:pointer;font-weight:600;color:var(--mute)}
-.lang button.on{background:var(--pri);color:#fff}
-.err{background:var(--badbg);color:var(--bad);border-radius:9px;padding:10px 12px;margin-top:14px;font-size:15px}
-.note{background:var(--warnbg);color:var(--warn);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:15px}
-.link{background:none;border:0;color:var(--pri);cursor:pointer;padding:0;text-decoration:underline}
-.tcard{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:12px}
-.tcard .t{font-weight:600}
-.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:13px;font-weight:600}
-.b-ok{background:var(--okbg);color:var(--ok)}.b-wip{background:var(--warnbg);color:var(--warn)}.b-new{background:#e8edf3;color:var(--mute)}
+h1,h2{margin:0}
+.hero{font-size:clamp(28px,5.5vw,40px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin:26px 0 22px}
+.hero.sm{font-size:clamp(24px,4.5vw,32px);margin:18px 0 4px}
+h2.sec{font-size:18px;font-weight:600;margin:28px 0 6px}
+.mute{color:var(--mute)}.small{font-size:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px}
+.panel+.panel{margin-top:16px}
+label{display:block;font-weight:600;margin:16px 0 6px;font-size:14px}
+label:first-child{margin-top:0}
+input[type=text],input[type=password],input[type=search],select{width:100%;height:46px;padding:0 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+input:focus,select:focus{border-color:var(--pri)}
+.pwbox{position:relative}.pwbox input{padding-right:92px}
+.pwt{position:absolute;right:4px;top:4px;height:38px;padding:0 12px;border:0;background:none;color:var(--pri-d);font-weight:600;cursor:pointer;border-radius:6px}
+.pwt:hover{background:var(--pri-t)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:1.5px solid var(--pri);border-radius:8px;padding:0 20px;background:var(--pri);color:var(--on-pri);font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--pri-d);border-color:var(--pri-d);color:var(--on-pri)}
+[data-theme=dark] .btn:hover{color:#0D1318}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.sec:hover{background:var(--pri-t);border-color:var(--pri);color:var(--ink)}
+.btn.sm{min-height:36px;padding:0 13px;font-size:14px}
+.btn.block{width:100%;margin-top:20px}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border:1.5px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;color:var(--ink)}
+.icon-btn:hover{border-color:var(--pri);background:var(--pri-t)}
+.lang{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.lang button{border:0;background:none;padding:0 12px;height:37px;cursor:pointer;font-weight:600;color:var(--mute)}
+.lang button.on{background:var(--pri);color:var(--on-pri)}
+.err{background:var(--bad-t);color:var(--bad);border-radius:8px;padding:11px 14px;margin-top:16px;font-size:15px;font-weight:500}
+.note{background:var(--warn-t);color:var(--warn);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:15px}
+.link{background:none;border:0;color:var(--pri-d);cursor:pointer;padding:6px;font-weight:500;text-decoration:underline;text-underline-offset:3px}
+/* bosh sahifa */
+.list{border-top:1px solid var(--line);margin-top:8px}
+.trow{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:18px 2px;border-bottom:1px solid var(--line)}
+.trow .t{font-weight:600;font-size:18px}
+.meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap;color:var(--mute);font-size:14px;margin-top:2px}
+.badge{display:inline-block;padding:1px 9px;border-radius:4px;font-size:13px;font-weight:600}
+.b-ok{background:var(--ok-t);color:var(--ok)}.b-wip{background:var(--warn-t);color:var(--warn)}.b-new{background:var(--soft);color:var(--mute)}
+.score{font-size:15px;color:var(--mute)}.score b{color:var(--ink);font-size:20px;margin-left:4px}
 /* test */
-.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;padding:4px 12px;border-radius:9px;background:#e8f1f9;color:var(--pri-d)}
-.timer.low{background:var(--badbg);color:var(--bad)}
-.qno{color:var(--mute);font-size:14px;margin-bottom:6px}
-.qtext{font-size:19px;font-weight:600;margin:0 0 16px;user-select:none;-webkit-user-select:none}
-.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px;margin-top:10px;cursor:pointer;user-select:none;-webkit-user-select:none}
-.opt:hover{border-color:#9db9d3}
-.opt .k{flex:none;width:28px;height:28px;border-radius:50%;background:#e8edf3;display:grid;place-items:center;font-weight:700;font-size:14px}
-.opt.sel{border-color:var(--pri);background:#eaf3fb}.opt.sel .k{background:var(--pri);color:#fff}
-.nav{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
-.nav button{width:38px;height:38px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
-.nav button.ans{background:#d7eadb;border-color:#9ccaa7}
-.nav button.cur{outline:2px solid var(--pri);outline-offset:1px}
-.big{font-size:56px;font-weight:800;line-height:1.1;margin:8px 0}
-.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
-.stat{flex:1;min-width:110px;border-radius:10px;padding:12px;text-align:center}
-.stat b{display:block;font-size:24px}
-.s-ok{background:var(--okbg);color:var(--ok)}.s-bad{background:var(--badbg);color:var(--bad)}.s-n{background:#e8f1f9;color:var(--pri-d)}
-.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:grid;place-items:center;padding:16px;z-index:10}
-.modal .box{background:#fff;border-radius:14px;padding:22px;max-width:440px;width:100%}
-/* admin */
-.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.tabs button{border:0;background:#e8edf3;border-radius:9px;padding:9px 16px;font-weight:600;cursor:pointer}
-.tabs button.on{background:var(--pri);color:#fff}
-.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
-.filters>div{min-width:150px}.filters label{margin:0 0 4px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
-.chip{background:#e8f1f9;color:var(--pri-d);border-radius:99px;padding:3px 12px;font-size:14px;font-weight:600}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:20px;padding:3px 12px;border-radius:6px;background:var(--pri-t);color:var(--pri-d);min-width:86px;text-align:center}
+.timer.low{background:var(--bad-t);color:var(--bad)}
+.testgrid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;align-items:start;margin-top:18px}
+.side{position:sticky;top:78px}
+.qno{color:var(--mute);font-size:14px;font-weight:500;margin-bottom:8px}
+.qtext{font-size:clamp(18px,2.6vw,22px);font-weight:600;line-height:1.4;margin:0 0 18px;user-select:none;-webkit-user-select:none}
+.opt{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:13px 15px;margin-top:10px;cursor:pointer;user-select:none;-webkit-user-select:none;min-height:56px;transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--pri)}
+.opt .k{flex:none;width:30px;height:30px;border-radius:4px;border:1.5px solid var(--line);display:grid;place-items:center;font-weight:600;font-size:14px;background:var(--bg)}
+.opt .tx{padding-top:3px;font-size:17px}
+.opt.sel{border-color:var(--pri);background:var(--pri-t)}
+.opt.sel .k{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
+.hint{margin:16px 0 0}
+@media (hover:none){.hint{display:none}}
+.actions{position:sticky;bottom:0;display:flex;gap:10px;padding:14px 0 12px;margin-top:6px;background:linear-gradient(to top,var(--bg) 72%,transparent)}
+.cnt{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}.cnt b{font-size:22px;font-weight:800}
+.nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px}
+.nav button{aspect-ratio:1;border-radius:4px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;padding:0}
+.nav button:hover{border-color:var(--pri)}
+.nav button.ans{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
+.nav button.cur{outline:3px solid var(--ink);outline-offset:2px}
+@media (max-width:860px){.testgrid{grid-template-columns:1fr}.side{position:static}}
+/* natija */
+.res{text-align:left}
+.big{font-size:clamp(52px,12vw,76px);font-weight:800;line-height:1;letter-spacing:-.03em;margin:10px 0 0}
+.big small{font-size:.4em;font-weight:600;color:var(--mute);letter-spacing:0}
+.bits{display:grid;gap:6px;max-width:440px;margin:22px 0}
+.bits i{display:block;aspect-ratio:1;border-radius:3px;border:1.5px solid var(--bad);background:repeating-linear-gradient(135deg,transparent 0 4px,var(--bad-t) 4px 8px)}
+.bits i.y{background:var(--ok);border-color:var(--ok)}
+@media (prefers-reduced-motion:no-preference){.bits i{animation:pop .32s cubic-bezier(.2,.9,.3,1.3) both}}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
+.figs{display:flex;flex-wrap:wrap;gap:14px 0}
+.fig{padding-right:24px;margin-right:24px;border-right:1px solid var(--line)}
+.fig:last-child{border:0;margin:0;padding:0}
+.fig b{display:block;font-size:28px;font-weight:800;line-height:1.1}
+.fig span{font-size:14px;color:var(--mute)}
+.fig.ok b{color:var(--ok)}.fig.bad b{color:var(--bad)}
+/* oyna va xabarlar */
+.modal{position:fixed;inset:0;background:rgba(8,12,16,.55);display:grid;place-items:center;padding:16px;z-index:20}
+.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;max-width:460px;width:100%;box-shadow:var(--sh)}
+#toasts{position:fixed;left:50%;top:14px;transform:translateX(-50%);display:grid;gap:8px;z-index:30;width:min(92vw,440px);pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:8px;font-weight:500;box-shadow:var(--sh)}
+.toast.bad{background:var(--bad);color:var(--on-bad)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:tin .2s ease-out}}
+@keyframes tin{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
+/* o'qituvchi paneli */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tabs button{border:0;background:none;color:var(--mute);padding:10px 16px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--pri)}
+.filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:18px}
+.filters>div{min-width:130px}.filters label{margin:0 0 4px}
+.filters .grow{flex:1;min-width:170px}
+.dist{display:grid;gap:6px;max-width:440px;margin:0 0 20px}
+.dist .r{display:grid;grid-template-columns:22px 1fr 34px;gap:10px;align-items:center;font-size:14px}
+.dist .r b{font-weight:800}
+.dist .bar{height:12px;background:var(--soft);border-radius:3px;overflow:hidden}
+.dist .bar i{display:block;height:100%;background:var(--pri);min-width:0}
+.dist .r.g5 .bar i{background:var(--ok)}.dist .r.g2 .bar i{background:var(--bad)}
+.dist .r span{text-align:right;color:var(--mute);font-variant-numeric:tabular-nums}
+.tw{overflow:auto;max-height:66vh;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 table{width:100%;border-collapse:collapse;font-size:15px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-th{background:#f0f3f7;position:sticky;top:0;font-size:13px;text-transform:uppercase;letter-spacing:.3px;color:var(--mute)}
-.tw{overflow:auto;max-height:68vh;border:1px solid var(--line);border-radius:10px}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+tbody tr:hover td{background:var(--soft)}
+th{background:var(--soft);position:sticky;top:0;z-index:1;font-size:13px;font-weight:600;color:var(--mute)}
+th[data-act=sort]{cursor:pointer;user-select:none}
+th[data-act=sort]:hover{color:var(--ink)}
+th .ar{color:var(--pri-d)}
 td.n{text-align:right;font-variant-numeric:tabular-nums}
-.g5{color:var(--ok);font-weight:700}.g2{color:var(--bad);font-weight:700}
-@media (max-width:560px){.qtext{font-size:17px}.big{font-size:44px}}
-@media print{.top,.tabs,.filters,.btn{display:none!important}}
+.g5{color:var(--ok);font-weight:800}.g2{color:var(--bad);font-weight:800}
+.empty{padding:28px;text-align:center;color:var(--mute)}
+@media (max-width:560px){.wrap{padding:12px 12px 56px}.panel{padding:16px}.brand{font-size:16px}.lang button{padding:0 8px;font-size:14px}.fig{padding-right:16px;margin-right:16px}
+  .top.sticky .brand span{display:none}.top.sticky{gap:8px}.timer{min-width:74px;font-size:18px}}
+@media print{.top,.tabs,.filters,.btn,#toasts{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
@@ -91,6 +174,7 @@ const CFG = { URL: 'https://ywzikqgtmrkzjgvhsvsg.supabase.co', KEY: 'sb_publisha
 
 /* ====================== YORDAMCHILAR ====================== */
 const app = document.getElementById('app');
+const $ = (s,r=document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mem = {};
 const ss = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return mem[k] ?? null; } },
@@ -110,6 +194,28 @@ async function rpc(fn, args){
 }
 const configured = () => /^https?:\/\//.test(CFG.URL) && CFG.KEY && !CFG.KEY.startsWith('PASTE');
 
+function toast(text, bad){
+  let h = $('#toasts');
+  if(!h){ h = document.createElement('div'); h.id = 'toasts'; h.setAttribute('aria-live','polite'); document.body.appendChild(h); }
+  const d = document.createElement('div'); d.className = 'toast' + (bad ? ' bad' : ''); d.textContent = text;
+  h.appendChild(d); setTimeout(() => d.remove(), 4500);
+}
+
+/* ====================== MAVZU VA BELGILAR ====================== */
+const LOGO = '<svg class="logo" viewBox="0 0 3 5" width="14" height="23" aria-hidden="true" shape-rendering="crispEdges"><g fill="currentColor"><rect x="1" y="0" width="1" height="1"/><rect x="0" y="2" width="2" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="0" y="4" width="3" height="1"/></g></svg>';
+const SUN = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const curTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+const themeIcon = () => curTheme() === 'dark' ? SUN : MOON;
+function toggleTheme(){
+  const n = curTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = n; ls.set('theme', n);
+  document.querySelectorAll('[data-act=theme]').forEach(b => { b.innerHTML = themeIcon(); });
+}
+const themeBtn = () => `<button class="icon-btn" data-act="theme" aria-label="${esc(t('theme'))}" title="${esc(t('theme'))}">${themeIcon()}</button>`;
+const brand = txt => `<div class="brand">${LOGO}<span>${esc(txt)}</span></div>`;
+const pwField = (id, show, hide, ac) => `<div class="pwbox"><input type="password" id="${id}" autocomplete="${ac||'off'}" required><button type="button" class="pwt" data-act="pwt" data-for="${id}" data-show="${esc(show)}" data-hide="${esc(hide)}">${esc(show)}</button></div>`;
+
 /* ====================== TIL ====================== */
 const T = {
  kk:{ title:'Информатика тесті', login:'Логин', password:'Құпиясөз', signin:'Кіру', teacher:'Мұғалім үшін кіру', bad:'Логин немесе құпиясөз қате',
@@ -120,7 +226,10 @@ const T = {
   askStart:'Тест басталғаннан кейін таймер тоқтамайды. Бастаймыз ба?', cancel:'Бас тарту',
   net:'Байланыс қатесі. Интернетті тексеріп, қайталап көріңіз.', retry:'Қайталау', timeup:'Уақыт бітті. Жауаптар жіберілуде…',
   q:'Сұрақ', saving:'Жіберілуде…', already:'Сіз бұл тестті тапсырып қойдыңыз.', nt:'Бұл тест қазір қолжетімді емес.', loading:'Жүктелуде…', noq:'Бұл тестте сұрақтар жоқ.',
-  setup:'Сайт бапталмаған.' },
+  setup:'Сайт бапталмаған.',
+  show:'Көрсету', hide:'Жасыру', theme:'Жарық / түнгі режим', answered:'жауап берілді',
+  keys:'Жауап таңдау: 1–4 немесе A–D. Сұрақтар арасында: ← →',
+  offline:'Интернет жоқ. Байланысты тексеріңіз.', online:'Байланыс қалпына келді.', min5:'Тестке 5 минут қалды', min1:'Тестке 1 минут қалды' },
  uz:{ title:'Informatika testi', login:'Login', password:'Parol', signin:'Kirish', teacher:"O'qituvchi uchun kirish", bad:"Login yoki parol noto'g'ri",
   hello:'Salom', tests:'Mavjud testlar', none:"Hozircha mavjud test yo'q.", start:'Boshlash', cont:'Davom etish', done:'Topshirilgan',
   min:'daq', qs:'savol', left:'Qolgan vaqt', prev:'Oldingi', next:'Keyingi', finish:'Yakunlash',
@@ -129,17 +238,21 @@ const T = {
   askStart:"Test boshlangach taymer to'xtamaydi. Boshlaymizmi?", cancel:'Bekor qilish',
   net:"Aloqa xatosi. Internetni tekshirib, qayta urinib ko'ring.", retry:'Qayta urinish', timeup:'Vaqt tugadi. Javoblar yuborilmoqda…',
   q:'Savol', saving:'Yuborilmoqda…', already:'Siz bu testni topshirib bo‘lgansiz.', nt:'Bu test hozir mavjud emas.', loading:'Yuklanmoqda…', noq:"Bu testda savollar yo'q.",
-  setup:'Sayt sozlanmagan.' }
+  setup:'Sayt sozlanmagan.',
+  show:'Ko‘rsatish', hide:'Yashirish', theme:'Yorug‘ / qorong‘i rejim', answered:'javob berilgan',
+  keys:'Javob tanlash: 1–4 yoki A–D. Savollar orasida: ← →',
+  offline:"Internet yo'q. Aloqani tekshiring.", online:'Aloqa tiklandi.', min5:'Testga 5 daqiqa qoldi', min1:'Testga 1 daqiqa qoldi' }
 };
 let lang = ls.get('lang') === 'uz' ? 'uz' : 'kk';
 const t = k => T[lang][k];
+const tu = k => T.uz[k];
 function langSwitch(){
   return `<div class="lang"><button data-act="lang" data-v="kk" class="${lang==='kk'?'on':''}">Қазақша</button><button data-act="lang" data-v="uz" class="${lang==='uz'?'on':''}">O'zbekcha</button></div>`;
 }
 
 /* ====================== HOLAT ====================== */
-const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null };
-const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'' }, poll:null, msg:null };
+const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null, w5:false, w1:false };
+const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null };
 
 function clearTimers(){ if(S.timer){clearInterval(S.timer);S.timer=null;} if(A.poll){clearInterval(A.poll);A.poll=null;} }
 function fmt(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
@@ -151,28 +264,30 @@ function viewLogin(err){
   clearTimers(); S.att=null;
   app.className = 'wrap';
   app.innerHTML = `
-  <div class="top"><div class="brand">${t('title')}</div>${langSwitch()}</div>
+  <div class="top">${brand(t('title'))}<div class="row tools">${langSwitch()}${themeBtn()}</div></div>
   ${setupBanner()}
-  <form class="card" id="f-login" autocomplete="off">
-    <h1>${t('title')}</h1>
-    <label for="lg">${t('login')}</label>
-    <input type="text" id="lg" autocapitalize="none" autocomplete="off" spellcheck="false" required>
-    <label for="pw">${t('password')}</label>
-    <input type="password" id="pw" autocomplete="off" required>
-    ${err ? `<div class="err">${esc(err)}</div>` : ''}
-    <button class="btn block" type="submit">${t('signin')}</button>
-  </form>
-  <p class="small" style="text-align:center;margin-top:18px"><button class="link" data-act="to-admin">${t('teacher')}</button></p>`;
+  <div class="narrow">
+    <h1 class="hero">${t('title')}</h1>
+    <form class="panel" id="f-login" autocomplete="off">
+      <label for="lg">${t('login')}</label>
+      <input type="text" id="lg" autocapitalize="none" autocomplete="off" spellcheck="false" required>
+      <label for="pw">${t('password')}</label>
+      ${pwField('pw', t('show'), t('hide'))}
+      ${err ? `<div class="err" role="alert">${esc(err)}</div>` : ''}
+      <button class="btn block" type="submit">${t('signin')}</button>
+    </form>
+    <p style="text-align:center;margin-top:18px"><button class="link" data-act="to-admin">${t('teacher')}</button></p>
+  </div>`;
   $('#lg').focus();
 }
-const $ = (s,r=document) => r.querySelector(s);
 
 async function doLogin(login, pw){
+  login = login.trim().toLowerCase(); pw = pw.trim();
   const btn = $('#f-login button[type=submit]'); if(btn){ btn.disabled = true; btn.textContent = t('loading'); }
   try{
     const r = await rpc('student_login', { p_login: login, p_password: pw });
     if(!r.ok){ return viewLogin(t('bad')); }
-    S.creds = { l: login.trim().toLowerCase(), p: pw }; ss.set('cr', JSON.stringify(S.creds));
+    S.creds = { l: login, p: pw }; ss.set('cr', JSON.stringify(S.creds));
     S.student = r.student; S.tests = r.tests; viewHome();
   }catch(e){ viewLogin(t('net')); }
 }
@@ -182,37 +297,41 @@ function viewHome(msg){
   clearTimers(); S.att = null;
   app.className = 'wrap';
   const s = S.student;
-  const cards = S.tests.map(x => {
+  const rows = S.tests.map(x => {
     const badge = x.status==='done' ? `<span class="badge b-ok">${t('done')}</span>` : x.status==='in_progress' ? `<span class="badge b-wip">${t('cont')}</span>` : '';
     let right;
-    if (x.status==='done') right = `<div class="mute">${t('out')}: <b>${x.correct} / ${x.total}</b></div>`;
+    if (x.status==='done') right = `<div class="score">${t('out')}<b>${x.correct} / ${x.total}</b></div>`;
     else right = `<button class="btn" data-act="start" data-id="${x.id}">${x.status==='in_progress'?t('cont'):t('start')}</button>`;
-    return `<div class="tcard"><div><div class="t">${esc(stTitle(x))}</div>
-      <div class="mute small">${x.question_count} ${t('qs')} · ${x.duration_min} ${t('min')} ${badge}</div></div>${right}</div>`;
+    return `<div class="trow"><div><div class="t">${esc(stTitle(x))}</div>
+      <div class="meta"><span>${x.question_count} ${t('qs')}</span><span>${x.duration_min} ${t('min')}</span>${badge}</div></div>${right}</div>`;
   }).join('');
   app.innerHTML = `
-  <div class="top"><div class="brand">${t('title')}</div><div class="row">${langSwitch()}<button class="btn sec sm" data-act="logout">${t('logout')}</button></div></div>
-  <div class="card"><h1>${t('hello')}, ${esc(s.name)} ${esc(s.surname)}!</h1><div class="mute">${esc(s.class)}</div>
-  ${msg ? `<div class="err">${esc(msg)}</div>` : ''}
-  <h2 style="margin-top:20px">${t('tests')}</h2>${cards || `<p class="mute">${t('none')}</p>`}</div>`;
+  <div class="top">${brand(t('title'))}<div class="row tools">${langSwitch()}${themeBtn()}<button class="btn sec sm" data-act="logout">${t('logout')}</button></div></div>
+  <h1 class="hero sm">${t('hello')}, ${esc(s.name)} ${esc(s.surname)}!</h1>
+  <div class="mute">${esc(s.class)}</div>
+  ${msg ? `<div class="err" role="alert">${esc(msg)}</div>` : ''}
+  <h2 class="sec">${t('tests')}</h2>
+  <div class="list">${rows || `<p class="mute" style="padding:18px 2px">${t('none')}</p>`}</div>`;
 }
 
 function confirmBox(text, yes, no, onYes){
-  const m = document.createElement('div'); m.className='modal';
+  const m = document.createElement('div'); m.className='modal'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
   m.innerHTML = `<div class="box"><p style="margin-top:0;font-size:17px">${text}</p><div class="row" style="justify-content:flex-end"><button class="btn sec" data-m="no">${no}</button><button class="btn" data-m="yes">${yes}</button></div></div>`;
   m.addEventListener('click', e => { const b = e.target.closest('[data-m]'); if(!b) return; m.remove(); if(b.dataset.m==='yes') onYes(); });
+  m.addEventListener('keydown', e => { if(e.key==='Escape') m.remove(); });
   document.body.appendChild(m);
+  const y = m.querySelector('[data-m=yes]'); if(y) y.focus();
 }
 
 async function startTest(id){
   const x = S.tests.find(z => z.id === id); if(!x) return;
   const go = async () => {
-    app.innerHTML = `<div class="card">${t('loading')}</div>`;
+    app.innerHTML = `<div class="panel">${t('loading')}</div>`;
     try{
       const r = await rpc('student_start', { p_login: S.creds.l, p_password: S.creds.p, p_test_id: id });
       if(!r.ok){ return viewHome(r.error==='no_test' ? t('nt') : r.error==='no_questions' ? t('noq') : t('bad')); }
       if(r.done){ S.result = r.result; return viewResult(); }
-      S.att = r; S.ans = r.answers || {}; S.idx = 0;
+      S.att = r; S.ans = r.answers || {}; S.idx = 0; S.w5 = false; S.w1 = false;
       S.deadline = Date.parse(r.deadline) - (Date.parse(r.server_now) - Date.now());
       viewTest();
       S.timer = setInterval(tick, 500);
@@ -225,61 +344,93 @@ async function startTest(id){
 function tick(){
   const el = $('#tm'); const left = Math.ceil((S.deadline - Date.now())/1000);
   if(el){ el.textContent = fmt(left); el.classList.toggle('low', left <= 120); }
+  if(left <= 300 && left > 240 && !S.w5){ S.w5 = true; toast(t('min5')); }
+  if(left <= 60 && left > 0 && !S.w1){ S.w1 = true; toast(t('min1'), true); }
   if(left <= 0 && !S.busy){ finish(true); }
 }
 function viewTest(){
-  app.className = 'wrap';
+  app.className = 'wrap testw';
   const a = S.att, q = a.questions[S.idx], n = a.questions.length;
   const opts = (lang==='uz' ? q.opts_uz : q.opts_kk).map((o,i) =>
-    `<button class="opt ${S.ans[q.id]===i?'sel':''}" data-act="pick" data-i="${i}"><span class="k">${'ABCDEFGH'[i]}</span><span>${esc(o)}</span></button>`).join('');
-  const nav = a.questions.map((z,i) => `<button data-act="go" data-i="${i}" class="${S.ans[z.id]!==undefined?'ans':''} ${i===S.idx?'cur':''}">${i+1}</button>`).join('');
+    `<button class="opt ${S.ans[q.id]===i?'sel':''}" data-act="pick" data-i="${i}" aria-pressed="${S.ans[q.id]===i}"><span class="k">${'ABCDEFGH'[i]}</span><span class="tx">${esc(o)}</span></button>`).join('');
+  const nav = a.questions.map((z,i) => `<button data-act="go" data-i="${i}" aria-label="${t('q')} ${i+1}" class="${S.ans[z.id]!==undefined?'ans':''} ${i===S.idx?'cur':''}">${i+1}</button>`).join('');
   app.innerHTML = `
-  <div class="top"><div class="brand">${esc(lang==='uz'?a.title_uz:a.title_kk)}</div>
-    <div class="row">${langSwitch()}<span class="timer" id="tm">--:--</span></div></div>
-  <div class="card">
-    <div class="qno">${t('q')} ${S.idx+1} / ${n}</div>
-    <p class="qtext">${esc(lang==='uz'?q.q_uz:q.q_kk)}</p>
-    ${opts}
-    <div class="row" style="margin-top:20px">
-      <button class="btn sec" data-act="prev" ${S.idx===0?'disabled':''}>← ${t('prev')}</button>
-      <div class="sp"></div>
-      ${S.idx<n-1 ? `<button class="btn" data-act="next">${t('next')} →</button>` : `<button class="btn" data-act="finish">${t('finish')}</button>`}
-    </div>
-  </div>
-  <div class="card"><div class="row"><b>${Object.keys(S.ans).length} / ${n}</b><div class="sp"></div><button class="btn sec sm" data-act="finish">${t('finish')}</button></div><div class="nav">${nav}</div></div>`;
+  <div class="top sticky">${brand(lang==='uz'?a.title_uz:a.title_kk)}
+    <div class="row tools">${langSwitch()}${themeBtn()}<span class="timer" id="tm" role="timer">--:--</span></div></div>
+  <div class="testgrid">
+    <section>
+      <div class="panel">
+        <div class="qno">${t('q')} ${S.idx+1} / ${n}</div>
+        <p class="qtext">${esc(lang==='uz'?q.q_uz:q.q_kk)}</p>
+        <div id="opts">${opts}</div>
+        <p class="hint small mute">${t('keys')}</p>
+      </div>
+      <div class="actions">
+        <button class="btn sec" data-act="prev" ${S.idx===0?'disabled':''}>← ${t('prev')}</button>
+        <div class="sp"></div>
+        ${S.idx<n-1 ? `<button class="btn" data-act="next">${t('next')} →</button>` : `<button class="btn" data-act="finish">${t('finish')}</button>`}
+      </div>
+    </section>
+    <aside class="side"><div class="panel">
+      <div class="cnt"><b id="cnt">${Object.keys(S.ans).length} / ${n}</b><span class="mute small">${t('answered')}</span></div>
+      <div class="nav" id="nav">${nav}</div>
+      <button class="btn sec block" data-act="finish">${t('finish')}</button>
+    </div></aside>
+  </div>`;
+  window.scrollTo(0, 0);
   tick();
+}
+/* Javob tanlanganda sahifa qayta chizilmaydi: faqat belgilar yangilanadi */
+function paintSel(){
+  const a = S.att, q = a.questions[S.idx];
+  document.querySelectorAll('#opts .opt').forEach((el,i) => { const on = S.ans[q.id]===i; el.classList.toggle('sel', on); el.setAttribute('aria-pressed', on); });
+  const nb = document.querySelectorAll('#nav button');
+  a.questions.forEach((z,i) => { if(nb[i]) nb[i].classList.toggle('ans', S.ans[z.id]!==undefined); });
+  const c = $('#cnt'); if(c) c.textContent = Object.keys(S.ans).length + ' / ' + a.questions.length;
+}
+function pick(i){
+  const q = S.att.questions[S.idx]; S.ans[q.id] = i; queueSave(); paintSel();
 }
 function queueSave(){
   clearTimeout(S.saveT);
   S.saveT = setTimeout(() => { if(S.att) rpc('student_save', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans }).catch(()=>{}); }, 500);
 }
 function askFinish(){
-  const n = S.att.questions.length, un = n - Object.keys(S.ans).length;
-  const txt = `<b>${t('askFinish')}</b>` + (un>0 ? `<br><span class="mute">${t('unans')}: ${un}</span>` : '');
+  const un = S.att.questions.map((z,i) => S.ans[z.id]===undefined ? i+1 : null).filter(Boolean);
+  const txt = `<b>${t('askFinish')}</b>` + (un.length ? `<br><span class="mute">${t('unans')}: ${un.length} (${un.join(', ')})</span>` : '');
   confirmBox(txt, t('yes'), t('no'), () => finish(false));
 }
 async function finish(auto){
   if(S.busy) return; S.busy = true; clearInterval(S.timer); S.timer = null; clearTimeout(S.saveT);
   document.querySelectorAll('.modal').forEach(m => m.remove());
-  app.innerHTML = `<div class="card"><h2>${auto ? t('timeup') : t('saving')}</h2></div>`;
+  app.innerHTML = `<div class="panel"><h2>${auto ? t('timeup') : t('saving')}</h2></div>`;
   try{
     const r = await rpc('student_submit', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans });
     if(!r.ok) throw new Error('x');
     S.busy = false; S.result = r.result; S.att = null; viewResult();
   }catch(e){
     S.busy = false;
-    app.innerHTML = `<div class="card"><div class="err">${t('net')}</div><button class="btn block" data-act="retry-submit">${t('retry')}</button></div>`;
+    app.innerHTML = `<div class="panel"><div class="err" role="alert" style="margin-top:0">${t('net')}</div><button class="btn block" data-act="retry-submit">${t('retry')}</button></div>`;
   }
 }
 function viewResult(){
   clearTimers(); const r = S.result;
   app.className = 'wrap';
+  const cols = Math.min(10, Math.max(1, r.total));
+  const cells = Array.from({length:r.total}, (_,i) => `<i class="${i<r.correct?'y':''}" style="animation-delay:${i*35}ms"></i>`).join('');
   app.innerHTML = `
-  <div class="top"><div class="brand">${t('title')}</div>${langSwitch()}</div>
-  <div class="card" style="text-align:center"><h1>${t('result')}</h1>
-    <div class="big">${r.correct} / ${r.total}</div>
-    <div class="stats"><div class="stat s-ok"><b>${r.correct}</b>${t('correct')}</div><div class="stat s-bad"><b>${r.wrong}</b>${t('wrong')}</div><div class="stat s-n"><b>${r.percent}%</b>${t('percent')}</div></div>
-    <button class="btn block" data-act="logout">${t('logout')}</button></div>`;
+  <div class="top">${brand(t('title'))}<div class="row tools">${langSwitch()}${themeBtn()}</div></div>
+  <div class="narrow res">
+    <h1 class="hero sm">${t('result')}</h1>
+    <div class="big">${r.correct}<small> / ${r.total}</small></div>
+    <div class="bits" aria-hidden="true" style="grid-template-columns:repeat(${cols},1fr)">${cells}</div>
+    <div class="figs">
+      <div class="fig ok"><b>${r.correct}</b><span>${t('correct')}</span></div>
+      <div class="fig bad"><b>${r.wrong}</b><span>${t('wrong')}</span></div>
+      <div class="fig"><b>${r.percent}%</b><span>${t('percent')}</span></div>
+    </div>
+    <button class="btn block" data-act="logout">${t('logout')}</button>
+  </div>`;
 }
 
 /* ====================== ADMIN ====================== */
@@ -287,14 +438,17 @@ function viewAdminLogin(err){
   clearTimers();
   app.className = 'wrap';
   app.innerHTML = `
-  <div class="top"><div class="brand">O'qituvchi paneli</div></div>
+  <div class="top">${brand("O'qituvchi paneli")}<div class="row tools">${themeBtn()}</div></div>
   ${setupBanner()}
-  <form class="card" id="f-admin" autocomplete="off"><h1>O'qituvchi kirishi</h1>
-    <label for="au">Login</label><input type="text" id="au" autocapitalize="none" autocomplete="off" required>
-    <label for="ap">Parol</label><input type="password" id="ap" autocomplete="off" required>
-    ${err ? `<div class="err">${esc(err)}</div>` : ''}
-    <button class="btn block" type="submit">Kirish</button></form>
-  <p class="small" style="text-align:center;margin-top:18px"><button class="link" data-act="to-student">← O'quvchi kirishi</button></p>`;
+  <div class="narrow">
+    <h1 class="hero">O'qituvchi kirishi</h1>
+    <form class="panel" id="f-admin" autocomplete="off">
+      <label for="au">Login</label><input type="text" id="au" autocapitalize="none" autocomplete="off" required>
+      <label for="ap">Parol</label>${pwField('ap', tu('show'), tu('hide'))}
+      ${err ? `<div class="err" role="alert">${esc(err)}</div>` : ''}
+      <button class="btn block" type="submit">Kirish</button></form>
+    <p style="text-align:center;margin-top:18px"><button class="link" data-act="to-student">← O'quvchi kirishi</button></p>
+  </div>`;
   $('#au').focus();
 }
 async function adminLoad(){
@@ -311,23 +465,55 @@ function viewAdmin(){
   clearTimers();
   app.className = 'wrap wide';
   const tabs = [['res','Natijalar'],['tests','Testlar'],['set','Sozlamalar']].map(([k,n]) => `<button data-act="atab" data-v="${k}" class="${A.tab===k?'on':''}">${n}</button>`).join('');
-  app.innerHTML = `<div class="top"><div class="brand">O'qituvchi paneli · ${esc(A.u)}</div><button class="btn sec sm" data-act="alogout">Chiqish</button></div>
-    <div class="tabs">${tabs}</div>${A.msg ? `<div class="${A.msg.bad?'err':'note'}" style="margin-top:0;margin-bottom:12px">${esc(A.msg.t)}</div>` : ''}<div id="pane"></div>`;
-  A.msg = null;
+  app.innerHTML = `<div class="top">${brand("O'qituvchi paneli")}<div class="row tools"><span class="mute small">${esc(A.u)}</span>${themeBtn()}<button class="btn sec sm" data-act="alogout">Chiqish</button></div></div>
+    <div class="tabs">${tabs}</div><div id="pane"></div>`;
+  if(A.msg){ toast(A.msg.t, A.msg.bad); A.msg = null; }
   if(A.tab==='res'){ paneRes(); A.poll = setInterval(async () => { if(await adminLoad()) { paneRes(true); } }, 30000); }
   else if(A.tab==='tests') paneTests(); else paneSet();
+}
+/* test, sinf va guruh bo'yicha tanlangan qatorlar */
+function baseRows(){
+  let rows = A.rows.filter(r => String(r.test_id)===A.f.test);
+  if(A.f.cls) rows = rows.filter(r => r.class===A.f.cls);
+  if(A.f.grp) rows = rows.filter(r => String(r.grp)===A.f.grp);
+  return rows;
+}
+/* qidiruv va holat bo'yicha ham saralangan qatorlar */
+function shownRows(){
+  let rows = baseRows();
+  if(A.f.st) rows = rows.filter(r => r.status===A.f.st);
+  const q = A.f.q.trim().toLowerCase();
+  if(q) rows = rows.filter(r => (r.surname+' '+r.name+' '+r.login).toLowerCase().includes(q));
+  const key = {
+    name: r => (r.surname+' '+r.name).toLowerCase(),
+    cls:  r => r.class + String(r.grp ?? ''),
+    pct:  r => r.status==='done' ? 100*r.correct/r.total : null,
+    st:   r => ({done:0, in_progress:1, new:2}[r.status])
+  }[A.sort.k];
+  if(key){ rows = rows.slice().sort((a,b) => {
+    const x = key(a), y = key(b);
+    if(x===null && y===null) return 0;
+    if(x===null) return 1;      /* natijasizlar har doim pastda */
+    if(y===null) return -1;
+    return (x<y?-1:x>y?1:0) * A.sort.d; }); }
+  return rows;
 }
 function paneRes(keepScroll){
   const pane = $('#pane'); if(!pane) return;
   const tw = pane.querySelector('.tw'), sc = tw ? tw.scrollTop : 0;
+  const ae = document.activeElement, fkey = ae && ae.dataset ? ae.dataset.f : null, fpos = ae ? ae.selectionStart : null;
   const test = A.tests.find(x => String(x.id)===A.f.test);
-  let rows = A.rows.filter(r => String(r.test_id)===A.f.test);
-  const classes = [...new Set(rows.map(r => r.class))].sort();
-  const groups = [...new Set(rows.filter(r => !A.f.cls || r.class===A.f.cls).map(r => r.grp))].sort();
-  if(A.f.cls) rows = rows.filter(r => r.class===A.f.cls);
-  if(A.f.grp) rows = rows.filter(r => String(r.grp)===A.f.grp);
-  const done = rows.filter(r => r.status==='done'), wip = rows.filter(r => r.status==='in_progress'), nw = rows.filter(r => r.status==='new');
+  const testRows = A.rows.filter(r => String(r.test_id)===A.f.test);
+  const classes = [...new Set(testRows.map(r => r.class))].sort();
+  const groups = [...new Set(testRows.filter(r => !A.f.cls || r.class===A.f.cls).map(r => r.grp))].sort();
+  const base = baseRows(), rows = shownRows();
+  const done = base.filter(r => r.status==='done'), wip = base.filter(r => r.status==='in_progress'), nw = base.filter(r => r.status==='new');
   const avg = done.length ? Math.round(done.reduce((s,r) => s + 100*r.correct/r.total, 0) / done.length) : 0;
+  const cnt = {5:0,4:0,3:0,2:0}; done.forEach(r => { cnt[baho(r.correct, r.total)]++; });
+  const mx = Math.max(1, ...Object.values(cnt));
+  const dist = [5,4,3,2].map(g => `<div class="r g${g}"><b>${g}</b><div class="bar"><i style="width:${100*cnt[g]/mx}%"></i></div><span>${cnt[g]}</span></div>`).join('');
+  const arrow = k => A.sort.k===k ? `<span class="ar">${A.sort.d>0?'▲':'▼'}</span>` : '';
+  const th = (k, label) => `<th data-act="sort" data-k="${k}" aria-sort="${A.sort.k===k ? (A.sort.d>0?'ascending':'descending') : 'none'}">${label} ${arrow(k)}</th>`;
   const body = rows.map((r,i) => {
     const b = r.status==='done' ? baho(r.correct, r.total) : '';
     const st = r.status==='done' ? '<span class="badge b-ok">Topshirdi</span>' : r.status==='in_progress' ? '<span class="badge b-wip">Jarayonda</span>' : '<span class="badge b-new">Boshlamadi</span>';
@@ -336,21 +522,31 @@ function paneRes(keepScroll){
       <td class="n ${b===5?'g5':b===2?'g2':''}">${b}</td>
       <td>${r.status!=='new' ? `<button class="btn sec sm" data-act="reopen" data-s="${r.student_id}" data-t="${r.test_id}">Qayta ochish</button>` : ''}</td></tr>`;
   }).join('');
-  pane.innerHTML = `<div class="card">
+  const opt = (v,l) => `<option value="${v}" ${A.f.st===v?'selected':''}>${l}</option>`;
+  pane.innerHTML = `
     <div class="filters">
       <div><label>Test</label><select data-f="test">${A.tests.map(x => `<option value="${x.id}" ${String(x.id)===A.f.test?'selected':''}>${esc(x.title_uz)}</option>`).join('')}</select></div>
       <div><label>Sinf</label><select data-f="cls"><option value="">Hammasi</option>${classes.map(c => `<option ${c===A.f.cls?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
       <div><label>Guruh</label><select data-f="grp"><option value="">Hammasi</option>${groups.map(g => `<option ${String(g)===A.f.grp?'selected':''}>${g}</option>`).join('')}</select></div>
+      <div><label>Holat</label><select data-f="st">${opt('','Hammasi')}${opt('done','Topshirdi')}${opt('in_progress','Jarayonda')}${opt('new','Boshlamadi')}</select></div>
+      <div class="grow"><label>Qidirish</label><input type="search" data-f="q" value="${esc(A.f.q)}" placeholder="Familiya, ism yoki login" autocomplete="off"></div>
       <button class="btn sec" data-act="refresh">Yangilash</button><button class="btn" data-act="csv">Excel (CSV)</button>
     </div>
-    <div class="chips"><span class="chip">Jami: ${rows.length}</span><span class="chip">Topshirdi: ${done.length}</span><span class="chip">Jarayonda: ${wip.length}</span><span class="chip">Boshlamadi: ${nw.length}</span><span class="chip">O'rtacha: ${avg}%</span></div>
+    <div class="figs" style="margin-bottom:20px">
+      <div class="fig"><b>${base.length}</b><span>Jami</span></div><div class="fig ok"><b>${done.length}</b><span>Topshirdi</span></div>
+      <div class="fig"><b>${wip.length}</b><span>Jarayonda</span></div><div class="fig"><b>${nw.length}</b><span>Boshlamadi</span></div>
+      <div class="fig"><b>${avg}%</b><span>O'rtacha</span></div>
+    </div>
+    ${done.length ? `<div class="dist" aria-label="Baholar taqsimoti">${dist}</div>` : ''}
     ${test ? '' : '<p class="mute">Test yo‘q.</p>'}
-    <div class="tw"><table><thead><tr><th>№</th><th>F.I.Sh</th><th>Sinf</th><th>Guruh</th><th>Holat</th><th>To‘g‘ri</th><th>Foiz</th><th>Baho</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
-    <p class="mute small" style="margin-bottom:0">Baho: 86–100% → 5, 71–85% → 4, 55–70% → 3, qolgani → 2. Jadval har 30 soniyada yangilanadi.</p></div>`;
+    <div class="tw"><table><thead><tr><th>№</th>${th('name','F.I.Sh')}${th('cls','Sinf')}<th>Guruh</th>${th('st','Holat')}<th>To‘g‘ri</th>${th('pct','Foiz')}<th>Baho</th><th></th></tr></thead><tbody>${body}</tbody></table>
+      ${rows.length ? '' : '<div class="empty">Bu filtrlar bo‘yicha o‘quvchi topilmadi.</div>'}</div>
+    <p class="mute small" style="margin-bottom:0">Baho: 86–100% → 5, 71–85% → 4, 55–70% → 3, qolgani → 2. Jadval har 30 soniyada yangilanadi. Ustun nomini bossangiz, saralanadi.</p>`;
   const nt = pane.querySelector('.tw'); if(nt && keepScroll) nt.scrollTop = sc;
+  if(fkey){ const el = pane.querySelector(`[data-f="${fkey}"]`); if(el){ el.focus(); try{ if(fpos!=null) el.setSelectionRange(fpos, fpos); }catch(e){} } }
 }
 function paneTests(){
-  $('#pane').innerHTML = `<div class="card"><h2>Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Holat</th><th></th></tr></thead><tbody>
+  $('#pane').innerHTML = `<div class="panel"><h2 style="margin-bottom:12px">Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Holat</th><th></th></tr></thead><tbody>
     ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n">${x.duration_min} daq</td>
     <td>${x.active ? '<span class="badge b-ok">Ochiq</span>' : '<span class="badge b-new">Yopiq</span>'}</td>
     <td><button class="btn sec sm" data-act="toggle" data-id="${x.id}" data-v="${x.active?0:1}">${x.active?'Yopish':'Ochish'}</button></td></tr>`).join('')}
@@ -360,18 +556,18 @@ function paneSet(){
   const stu = []; const seen = new Set();
   for(const r of A.rows){ if(!seen.has(r.student_id)){ seen.add(r.student_id); stu.push(r); } }
   stu.sort((a,b) => (a.class+a.surname+a.name).localeCompare(b.class+b.surname+b.name));
-  $('#pane').innerHTML = `
-  <div class="card"><h2>O'quvchi parolini o'zgartirish</h2>
+  $('#pane').innerHTML = `<div style="max-width:560px">
+  <div class="panel"><h2 style="margin-bottom:12px">O'quvchi parolini o'zgartirish</h2>
     <label>O'quvchi</label><select id="sp-s">${stu.map(s => `<option value="${s.student_id}">${esc(s.class)} · ${esc(s.surname)} ${esc(s.name)} (${esc(s.login)})</option>`).join('')}</select>
     <label>Yangi parol (kamida 4 belgi)</label><input type="text" id="sp-p" autocomplete="off">
     <button class="btn block" data-act="setpw">Parolni saqlash</button></div>
-  <div class="card"><h2>O'zingizning (admin) parolingiz</h2>
-    <label>Yangi parol (kamida 6 belgi)</label><input type="password" id="ap1" autocomplete="new-password">
-    <label>Yana bir bor</label><input type="password" id="ap2" autocomplete="new-password">
-    <button class="btn block" data-act="chpw">Admin parolini o'zgartirish</button></div>`;
+  <div class="panel"><h2 style="margin-bottom:12px">O'zingizning (admin) parolingiz</h2>
+    <label>Yangi parol (kamida 6 belgi)</label>${pwField('ap1', tu('show'), tu('hide'), 'new-password')}
+    <label>Yana bir bor</label>${pwField('ap2', tu('show'), tu('hide'), 'new-password')}
+    <button class="btn block" data-act="chpw">Admin parolini o'zgartirish</button></div></div>`;
 }
 function csv(){
-  const rows = A.rows.filter(r => String(r.test_id)===A.f.test && (!A.f.cls || r.class===A.f.cls) && (!A.f.grp || String(r.grp)===A.f.grp));
+  const rows = shownRows();
   const test = A.tests.find(x => String(x.id)===A.f.test);
   const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
   const lines = [['№','Familiya','Ism','Sinf','Guruh','Login','Holat','To\'g\'ri','Jami','Foiz','Baho'].map(q).join(',')];
@@ -387,7 +583,7 @@ document.addEventListener('submit', async e => {
   e.preventDefault();
   if(e.target.id==='f-login') return doLogin($('#lg').value, $('#pw').value);
   if(e.target.id==='f-admin'){
-    const u = $('#au').value.trim(), p = $('#ap').value; const b = $('#f-admin button'); b.disabled = true;
+    const u = $('#au').value.trim(), p = $('#ap').value.trim(); const b = $('#f-admin button[type=submit]'); b.disabled = true;
     try{ const r = await rpc('admin_login', { p_user:u, p_password:p });
       if(!r.ok) return viewAdminLogin('Login yoki parol noto‘g‘ri');
       A.u = u.toLowerCase(); A.p = p; ss.set('ad', JSON.stringify({u:A.u,p})); if(await adminLoad()) viewAdmin(); else viewAdmin();
@@ -395,19 +591,24 @@ document.addEventListener('submit', async e => {
   }
 });
 document.addEventListener('change', e => {
-  const f = e.target.dataset && e.target.dataset.f; if(!f) return;
+  const f = e.target.dataset && e.target.dataset.f; if(!f || f==='q') return;
   A.f[f] = e.target.value; if(f==='cls') A.f.grp = ''; paneRes();
+});
+document.addEventListener('input', e => {
+  if(e.target.dataset && e.target.dataset.f==='q'){ A.f.q = e.target.value; paneRes(); }
 });
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if(!b) return; const act = b.dataset.act;
   switch(act){
     case 'lang': lang = b.dataset.v; ls.set('lang', lang);
       if(S.att) viewTest(); else if(S.result && $('.big')) viewResult(); else if(S.student && S.creds) viewHome(); else viewLogin(); break;
+    case 'theme': toggleTheme(); break;
+    case 'pwt': { const i = document.getElementById(b.dataset.for); if(!i) break; const show = i.type==='password'; i.type = show ? 'text' : 'password'; b.textContent = show ? b.dataset.hide : b.dataset.show; break; }
     case 'to-admin': viewAdminLogin(); break;
     case 'to-student': viewLogin(); break;
     case 'logout': S.creds = null; S.student = null; S.result = null; ss.del('cr'); viewLogin(); break;
     case 'start': startTest(Number(b.dataset.id)); break;
-    case 'pick': { const q = S.att.questions[S.idx]; S.ans[q.id] = Number(b.dataset.i); queueSave(); viewTest(); break; }
+    case 'pick': pick(Number(b.dataset.i)); break;
     case 'go': S.idx = Number(b.dataset.i); viewTest(); break;
     case 'prev': if(S.idx>0){ S.idx--; viewTest(); } break;
     case 'next': if(S.idx < S.att.questions.length-1){ S.idx++; viewTest(); } break;
@@ -417,6 +618,7 @@ document.addEventListener('click', async e => {
     case 'alogout': A.u = A.p = null; ss.del('ad'); viewAdminLogin(); break;
     case 'atab': A.tab = b.dataset.v; viewAdmin(); break;
     case 'refresh': if(await adminLoad()) paneRes(true); break;
+    case 'sort': { const k = b.dataset.k; if(A.sort.k===k) A.sort.d = -A.sort.d; else A.sort = { k, d:1 }; paneRes(true); break; }
     case 'csv': csv(); break;
     case 'toggle': { try{ await rpc('admin_set_active', { p_user:A.u, p_password:A.p, p_test_id:Number(b.dataset.id), p_active: b.dataset.v==='1' }); await adminLoad(); }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; } viewAdmin(); break; }
     case 'reopen': {
@@ -438,13 +640,27 @@ document.addEventListener('click', async e => {
       viewAdmin(); break; }
   }
 });
+/* Klaviatura: 1-4 yoki A-D javob tanlaydi, ← → savollar orasida yuradi */
+document.addEventListener('keydown', e => {
+  if(!S.att || S.busy || $('.modal') || e.ctrlKey || e.metaKey || e.altKey) return;
+  const q = S.att.questions[S.idx], n = S.att.questions.length;
+  const cnt = (lang==='uz' ? q.opts_uz : q.opts_kk).length;
+  if(e.key === 'ArrowRight'){ if(S.idx < n-1){ S.idx++; viewTest(); } return; }
+  if(e.key === 'ArrowLeft'){ if(S.idx > 0){ S.idx--; viewTest(); } return; }
+  let i = -1;
+  if(/^[1-9]$/.test(e.key)) i = Number(e.key) - 1;
+  else if(e.key.length === 1) i = 'ABCDEFGH'.indexOf(e.key.toUpperCase());
+  if(i >= 0 && i < cnt){ e.preventDefault(); pick(i); }
+});
+window.addEventListener('offline', () => toast(t('offline'), true));
+window.addEventListener('online', () => toast(t('online')));
 window.addEventListener('beforeunload', e => { if(S.att){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ====================== BOSHLANISH ====================== */
 (async function init(){
   try{
     const ad = JSON.parse(ss.get('ad') || 'null');
-    if(ad && ad.u){ A.u = ad.u; A.p = ad.p; app.innerHTML = '<div class="card">…</div>'; if(await adminLoad()){ return viewAdmin(); } }
+    if(ad && ad.u){ A.u = ad.u; A.p = ad.p; app.innerHTML = '<div class="panel">…</div>'; if(await adminLoad()){ return viewAdmin(); } }
     const cr = JSON.parse(ss.get('cr') || 'null');
     if(cr && cr.l){ const r = await rpc('student_login', { p_login: cr.l, p_password: cr.p });
       if(r.ok){ S.creds = cr; S.student = r.student; S.tests = r.tests; return viewHome(); } }
