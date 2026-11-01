@@ -159,6 +159,12 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .empty{padding:28px;text-align:center;color:var(--mute)}
 @media (max-width:560px){.wrap{padding:12px 12px 56px}.panel{padding:16px}.brand{font-size:16px}.lang button{padding:0 8px;font-size:14px}.fig{padding-right:16px;margin-right:16px}
   .top.sticky .brand span{display:none}.top.sticky{gap:8px}.timer{min-width:74px;font-size:18px}}
+.opt.rv{cursor:default}.opt.rv:hover{border-color:var(--line)}
+.opt.rv-ok{border-color:var(--ok);background:var(--ok-t)}.opt.rv-ok:hover{border-color:var(--ok)}
+.opt.rv-bad{border-color:var(--bad);background:var(--bad-t)}.opt.rv-bad:hover{border-color:var(--bad)}
+.opt.rv-ok .k{background:var(--ok);border-color:var(--ok);color:#fff}.opt.rv-bad .k{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
+.tag{display:inline-block;font-size:13px;font-weight:600;margin-left:8px}
+.modal .box.scroll{max-height:90vh;overflow:auto}
 @media print{.top,.tabs,.filters,.btn,#toasts{display:none!important}body{background:#fff}}
 </style>
 </head>
@@ -229,7 +235,9 @@ const T = {
   setup:'Сайт бапталмаған.',
   show:'Көрсету', hide:'Жасыру', theme:'Жарық / түнгі режим', answered:'жауап берілді',
   keys:'Жауап таңдау: 1–4 немесе A–D. Сұрақтар арасында: ← →',
-  offline:'Интернет жоқ. Байланысты тексеріңіз.', online:'Байланыс қалпына келді.', min5:'Тестке 5 минут қалды', min1:'Тестке 1 минут қалды' },
+  offline:'Интернет жоқ. Байланысты тексеріңіз.', online:'Байланыс қалпына келді.', min5:'Тестке 5 минут қалды', min1:'Тестке 1 минут қалды',
+  review:'Қателерді қарау', reviewTitle:'Қателерді талдау', yourAns:'Сіздің жауабыңыз', rightAns:'Дұрыс жауап', noAns:'Жауап берілмеген', back:'Артқа', nolimit:'Уақыт шектелмеген',
+  soon:'Әлі ашылмаған', closedS:'Уақыты өтті', until:'дейін', since:'бастап', notOpen:'Бұл тест әлі ашылмаған.', closedMsg:'Бұл тесттің уақыты өтті.', noReview:'Талдау қолжетімді емес.' },
  uz:{ title:'Informatika testi', login:'Login', password:'Parol', signin:'Kirish', teacher:"O'qituvchi uchun kirish", bad:"Login yoki parol noto'g'ri",
   hello:'Salom', tests:'Mavjud testlar', none:"Hozircha mavjud test yo'q.", start:'Boshlash', cont:'Davom etish', done:'Topshirilgan',
   min:'daq', qs:'savol', left:'Qolgan vaqt', prev:'Oldingi', next:'Keyingi', finish:'Yakunlash',
@@ -241,7 +249,9 @@ const T = {
   setup:'Sayt sozlanmagan.',
   show:'Ko‘rsatish', hide:'Yashirish', theme:'Yorug‘ / qorong‘i rejim', answered:'javob berilgan',
   keys:'Javob tanlash: 1–4 yoki A–D. Savollar orasida: ← →',
-  offline:"Internet yo'q. Aloqani tekshiring.", online:'Aloqa tiklandi.', min5:'Testga 5 daqiqa qoldi', min1:'Testga 1 daqiqa qoldi' }
+  offline:"Internet yo'q. Aloqani tekshiring.", online:'Aloqa tiklandi.', min5:'Testga 5 daqiqa qoldi', min1:'Testga 1 daqiqa qoldi',
+  review:"Xatolarni ko'rish", reviewTitle:'Xatolar tahlili', yourAns:'Sizning javobingiz', rightAns:"To'g'ri javob", noAns:'Javob berilmagan', back:'Orqaga', nolimit:'Vaqt cheklanmagan',
+  soon:'Hali ochilmagan', closedS:'Vaqti tugagan', until:'gacha', since:'dan', notOpen:'Bu test hali ochilmagan.', closedMsg:'Bu testning vaqti tugagan.', noReview:'Tahlil mavjud emas.' }
 };
 let lang = ls.get('lang') === 'uz' ? 'uz' : 'kk';
 const t = k => T[lang][k];
@@ -254,6 +264,15 @@ function langSwitch(){
 const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null, w5:false, w1:false };
 const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null, qa:{ rows:null, key:'', sort:'pct' } };
 
+const p2 = n => String(n).padStart(2,'0');
+function fdt(iso){ const d = new Date(iso); return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes()); }
+function toLocalInput(iso){ if(!iso) return ''; const d = new Date(iso); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes()); }
+function winText(o, c){
+  if(o && c) return fdt(o)+' – '+fdt(c);
+  if(o) return fdt(o)+' '+t('since');
+  if(c) return fdt(c)+' '+t('until');
+  return '';
+}
 function clearTimers(){ if(S.timer){clearInterval(S.timer);S.timer=null;} if(A.poll){clearInterval(A.poll);A.poll=null;} }
 function fmt(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
 const stTitle = x => lang==='uz' ? x.title_uz : x.title_kk;
@@ -300,10 +319,12 @@ function viewHome(msg){
   const rows = S.tests.map(x => {
     const badge = x.status==='done' ? `<span class="badge b-ok">${t('done')}</span>` : x.status==='in_progress' ? `<span class="badge b-wip">${t('cont')}</span>` : '';
     let right;
-    if (x.status==='done') right = `<div class="score">${t('out')}<b>${x.correct} / ${x.total}</b></div>`;
+    if (x.status==='done') right = `<div class="score">${t('out')}<b>${x.correct} / ${x.total}</b>${x.review ? `<div style="margin-top:8px;text-align:right"><button class="btn sec sm" data-act="review" data-id="${x.id}">${t('review')}</button></div>` : ''}</div>`;
+    else if (x.status==='new' && x.state==='soon') right = `<span class="badge b-new">${t('soon')}</span>`;
+    else if (x.status==='new' && x.state==='closed') right = `<span class="badge b-new">${t('closedS')}</span>`;
     else right = `<button class="btn" data-act="start" data-id="${x.id}">${x.status==='in_progress'?t('cont'):t('start')}</button>`;
     return `<div class="trow"><div><div class="t">${esc(stTitle(x))}</div>
-      <div class="meta"><span>${x.question_count} ${t('qs')}</span><span>${x.duration_min} ${t('min')}</span>${badge}</div></div>${right}</div>`;
+      <div class="meta"><span>${x.question_count} ${t('qs')}</span><span>${x.duration_min===null ? t('nolimit') : x.duration_min+' '+t('min')}</span>${winText(x.opens_at,x.closes_at) ? `<span>${winText(x.opens_at,x.closes_at)}</span>` : ''}${badge}</div></div>${right}</div>`;
   }).join('');
   app.innerHTML = `
   <div class="top">${brand(t('title'))}<div class="row tools">${langSwitch()}${themeBtn()}<button class="btn sec sm" data-act="logout">${t('logout')}</button></div></div>
@@ -329,10 +350,11 @@ async function startTest(id){
     app.innerHTML = `<div class="panel">${t('loading')}</div>`;
     try{
       const r = await rpc('student_start', { p_login: S.creds.l, p_password: S.creds.p, p_test_id: id });
-      if(!r.ok){ return viewHome(r.error==='no_test' ? t('nt') : r.error==='no_questions' ? t('noq') : t('bad')); }
+      if(!r.ok){ return viewHome(r.error==='no_test' ? t('nt') : r.error==='no_questions' ? t('noq') : r.error==='not_open' ? t('notOpen') : r.error==='closed' ? t('closedMsg') : t('bad')); }
+      S.curTest = id;
       if(r.done){ S.result = r.result; return viewResult(); }
       S.att = r; S.ans = r.answers || {}; S.idx = 0; S.w5 = false; S.w1 = false;
-      S.deadline = Date.parse(r.deadline) - (Date.parse(r.server_now) - Date.now());
+      S.deadline = r.deadline ? Date.parse(r.deadline) - (Date.parse(r.server_now) - Date.now()) : Infinity;
       viewTest();
       S.timer = setInterval(tick, 500);
     }catch(e){ viewHome(t('net')); }
@@ -342,7 +364,8 @@ async function startTest(id){
 
 /* ====================== TEST ====================== */
 function tick(){
-  const el = $('#tm'); const left = Math.ceil((S.deadline - Date.now())/1000);
+  const el = $('#tm');
+  if(!isFinite(S.deadline)){ if(el) el.textContent = '∞'; return; } const left = Math.ceil((S.deadline - Date.now())/1000);
   if(el){ el.textContent = fmt(left); el.classList.toggle('low', left <= 120); }
   if(left <= 300 && left > 240 && !S.w5){ S.w5 = true; toast(t('min5')); }
   if(left <= 60 && left > 0 && !S.w1){ S.w1 = true; toast(t('min1'), true); }
@@ -429,8 +452,39 @@ function viewResult(){
       <div class="fig bad"><b>${r.wrong}</b><span>${t('wrong')}</span></div>
       <div class="fig"><b>${r.percent}%</b><span>${t('percent')}</span></div>
     </div>
+    ${r.review && S.curTest ? `<button class="btn sec block" data-act="review" data-id="${S.curTest}">${t('review')}</button>` : ''}
     <button class="btn block" data-act="logout">${t('logout')}</button>
   </div>`;
+}
+async function openReview(id){
+  app.innerHTML = `<div class="panel">${t('loading')}</div>`;
+  try{
+    const r = await rpc('student_review', { p_login:S.creds.l, p_password:S.creds.p, p_test_id:id });
+    if(!r.ok){ return S.result ? viewResult() : viewHome(t('noReview')); }
+    S.rv = { id, items:r.items, result:r.result }; viewReview();
+  }catch(e){ viewHome(t('net')); }
+}
+function viewReview(){
+  clearTimers(); app.className = 'wrap testw';
+  const R = S.rv, r = R.result;
+  const cards = R.items.map((q,n) => {
+    const opts = (lang==='uz' ? q.opts_uz : q.opts_kk).map((o,i) => {
+      const isOk = i===q.correct, isMine = i===q.chosen;
+      const cls = isOk ? 'rv-ok' : (isMine ? 'rv-bad' : '');
+      const tg = (isOk ? `<span class="tag" style="color:var(--ok)">✓ ${esc(t('rightAns'))}</span>` : '') + (isMine ? `<span class="tag" style="color:${isOk?'var(--ok)':'var(--bad)'}">${isOk?'':'✗ '}${isOk?'('+esc(t('yourAns'))+')':esc(t('yourAns'))}</span>` : '');
+      return `<div class="opt rv ${cls}"><span class="k">${'ABCDEFGH'[i]}</span><span class="tx">${esc(o)}${tg}</span></div>`;
+    }).join('');
+    const good = q.chosen === q.correct;
+    return `<div class="panel"><div class="qno">${t('q')} ${n+1} / ${R.items.length} · <b style="color:var(--${good?'ok':'bad'})">${good ? t('correct') : t('wrong')}</b></div>
+      <p class="qtext" style="user-select:text">${esc(lang==='uz'?q.q_uz:q.q_kk)}</p>${opts}
+      ${q.chosen===null ? `<div class="mute small" style="margin-top:10px">${t('noAns')}</div>` : ''}</div>`;
+  }).join('');
+  app.innerHTML = `
+  <div class="top">${brand(t('reviewTitle'))}<div class="row tools">${langSwitch()}${themeBtn()}</div></div>
+  <div class="row" style="margin-bottom:14px"><button class="btn sec sm" data-act="rv-back">← ${t('back')}</button><span class="mute">${t('out')}: <b>${r.correct} / ${r.total}</b></span></div>
+  ${cards}
+  <button class="btn sec block" data-act="rv-back">← ${t('back')}</button>`;
+  window.scrollTo(0,0);
 }
 
 /* ====================== ADMIN ====================== */
@@ -614,11 +668,13 @@ function csvQa(){
   a.download = 'savollar_tahlili_' + (A.f.cls || 'hammasi') + (A.f.grp ? '_g'+A.f.grp : '') + '_test' + (test ? test.id : '') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
 }
 function paneTests(){
-  $('#pane').innerHTML = `<div class="panel"><h2 style="margin-bottom:12px">Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Holat</th><th></th></tr></thead><tbody>
-    ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n">${x.duration_min} daq</td>
+  $('#pane').innerHTML = `<div class="panel"><h2 style="margin-bottom:12px">Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Topshirish oralig‘i</th><th>Xatolar tahlili</th><th>Holat</th><th></th></tr></thead><tbody>
+    ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n">${x.duration_min===null ? 'Cheklanmagan' : x.duration_min+' daq'}</td>
+    <td>${x.opens_at||x.closes_at ? (x.opens_at ? fdt(x.opens_at) : '…')+' – '+(x.closes_at ? fdt(x.closes_at) : '…') : '<span class="mute">Istalgan vaqt</span>'}</td>
+    <td>${x.show_review ? '<span class="badge b-ok">Yoqilgan</span>' : '<span class="badge b-new">Faqat ball</span>'}</td>
     <td>${x.active ? '<span class="badge b-ok">Ochiq</span>' : '<span class="badge b-new">Yopiq</span>'}</td>
-    <td><button class="btn sec sm" data-act="toggle" data-id="${x.id}" data-v="${x.active?0:1}">${x.active?'Yopish':'Ochish'}</button></td></tr>`).join('')}
-    </tbody></table></div><p class="mute small" style="margin-bottom:0">Yopiq testni o‘quvchilar ko‘rmaydi. Yangi testlar (yangi mavzular) bazaga SQL orqali qo‘shiladi.</p></div>`;
+    <td><div class="row" style="flex-wrap:nowrap"><button class="btn sec sm" data-act="tset" data-id="${x.id}">Sozlash</button><button class="btn sec sm" data-act="toggle" data-id="${x.id}" data-v="${x.active?0:1}">${x.active?'Yopish':'Ochish'}</button></div></td></tr>`).join('')}
+    </tbody></table></div><p class="mute small" style="margin-bottom:0">“Sozlash” tugmasi bilan test vaqtini, topshirish oralig‘ini va xatolar tahlilini o‘zgartirasiz. Yopiq testni o‘quvchilar ko‘rmaydi. Yangi testlar (yangi mavzular) bazaga SQL orqali qo‘shiladi.</p></div>`;
 }
 function paneSet(){
   const stu = []; const seen = new Set();
@@ -633,6 +689,44 @@ function paneSet(){
     <label>Yangi parol (kamida 6 belgi)</label>${pwField('ap1', tu('show'), tu('hide'), 'new-password')}
     <label>Yana bir bor</label>${pwField('ap2', tu('show'), tu('hide'), 'new-password')}
     <button class="btn block" data-act="chpw">Admin parolini o'zgartirish</button></div></div>`;
+}
+function tsetSync(){
+  const m = $('#tset'); if(!m) return;
+  $('#st-dur').disabled = $('#st-mode').value !== 'lim';
+  m.querySelectorAll('.st-d').forEach(i => { i.disabled = !$('#st-win').checked; });
+}
+function openTset(id){
+  const x = A.tests.find(z => z.id===id); if(!x) return;
+  const m = document.createElement('div'); m.className = 'modal'; m.id = 'tset'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
+  m.innerHTML = `<div class="box scroll"><h2 style="margin-bottom:4px">Test sozlamalari</h2><div class="mute small">${esc(x.title_uz)}</div>
+    <label>Test vaqti (o‘quvchi boshlagandan keyin)</label>
+    <div class="row" style="flex-wrap:nowrap"><select id="st-mode"><option value="lim" ${x.duration_min===null?'':'selected'}>Cheklangan</option><option value="unl" ${x.duration_min===null?'selected':''}>Vaqt chegarasi yo‘q</option></select>
+    <input type="text" id="st-dur" inputmode="numeric" value="${x.duration_min===null?25:x.duration_min}" style="width:90px" aria-label="daqiqa"><span class="mute">daqiqa</span></div>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:18px"><input type="checkbox" id="st-win" ${x.opens_at||x.closes_at?'checked':''}> Topshirish vaqt oralig‘ini belgilash</label>
+    <div class="small mute" style="margin:-2px 0 6px">Belgilanmasa, test istalgan vaqt topshiriladi.</div>
+    <label>Qachondan</label><input type="datetime-local" class="st-d" id="st-from" value="${toLocalInput(x.opens_at)}" style="width:100%;height:46px;padding:0 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">
+    <label>Qachongacha</label><input type="datetime-local" class="st-d" id="st-to" value="${toLocalInput(x.closes_at)}" style="width:100%;height:46px;padding:0 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">
+    <div class="small mute" style="margin-top:6px">Qachongacha vaqti o‘tgach, test avtomatik yakunlanadi. Oraliq tugashiga kam qolganda boshlagan o‘quvchiga qolgan vaqt beriladi.</div>
+    <label style="margin-top:18px">Test tugagach o‘quvchi nimani ko‘radi</label>
+    <select id="st-rev"><option value="0" ${x.show_review?'':'selected'}>Faqat ball</option><option value="1" ${x.show_review?'selected':''}>Ball + xatolar tahlili (o‘z javobi va to‘g‘ri javob)</option></select>
+    <div class="row" style="justify-content:flex-end;margin-top:20px"><button class="btn sec" data-act="tset-cancel">Bekor qilish</button><button class="btn" data-act="tset-save" data-id="${x.id}">Saqlash</button></div></div>`;
+  document.body.appendChild(m); tsetSync();
+}
+async function saveTset(id){
+  const unl = $('#st-mode').value === 'unl'; const dur = unl ? null : Number($('#st-dur').value.trim());
+  if(!unl && (!Number.isInteger(dur) || dur < 1 || dur > 600)){ toast('Daqiqa 1 dan 600 gacha butun son bo‘lsin.', true); return; }
+  let o = null, c = null;
+  if($('#st-win').checked){
+    if($('#st-from').value) o = new Date($('#st-from').value).toISOString();
+    if($('#st-to').value) c = new Date($('#st-to').value).toISOString();
+    if(o && c && Date.parse(c) <= Date.parse(o)){ toast('“Qachongacha” vaqti “Qachondan” dan keyin bo‘lsin.', true); return; }
+  }
+  try{
+    const r = await rpc('admin_update_test', { p_user:A.u, p_password:A.p, p_test_id:id, p_show_review:$('#st-rev').value==='1', p_opens_at:o, p_closes_at:c, p_duration_min:dur });
+    if(!r.ok){ toast('Saqlanmadi: ' + (r.error==='bad_window' ? 'vaqt oralig‘i noto‘g‘ri' : r.error==='bad_duration' ? 'daqiqa noto‘g‘ri' : 'xatolik'), true); return; }
+    document.querySelectorAll('.modal').forEach(m => m.remove());
+    await adminLoad(); A.msg = { t:'Sozlamalar saqlandi.' }; viewAdmin();
+  }catch(e){ toast('Aloqa xatosi. 07_natija_vaqt.sql Supabase’da Run qilinganmi?', true); }
 }
 function csv(){
   const rows = shownRows();
@@ -659,6 +753,7 @@ document.addEventListener('submit', async e => {
   }
 });
 document.addEventListener('change', e => {
+  if(e.target.id && e.target.id.startsWith('st-')) return tsetSync();
   const qf = e.target.dataset && e.target.dataset.qf;
   if(qf){ if(qf==='sort'){ A.qa.sort = e.target.value; return paneQa(); }
     A.f[qf] = e.target.value; if(qf==='cls') A.f.grp = ''; A.qa.rows = null; A.qa.key = ''; return paneQa(); }
@@ -672,12 +767,14 @@ document.addEventListener('click', async e => {
   const b = e.target.closest('[data-act]'); if(!b) return; const act = b.dataset.act;
   switch(act){
     case 'lang': lang = b.dataset.v; ls.set('lang', lang);
-      if(S.att) viewTest(); else if(S.result && $('.big')) viewResult(); else if(S.student && S.creds) viewHome(); else viewLogin(); break;
+      if(S.att) viewTest(); else if(S.rv && $('.qtext') && !$('#tm')) viewReview(); else if(S.result && $('.big')) viewResult(); else if(S.student && S.creds) viewHome(); else viewLogin(); break;
     case 'theme': toggleTheme(); break;
     case 'pwt': { const i = document.getElementById(b.dataset.for); if(!i) break; const show = i.type==='password'; i.type = show ? 'text' : 'password'; b.textContent = show ? b.dataset.hide : b.dataset.show; break; }
     case 'to-admin': viewAdminLogin(); break;
     case 'to-student': viewLogin(); break;
     case 'logout': S.creds = null; S.student = null; S.result = null; ss.del('cr'); viewLogin(); break;
+    case 'review': openReview(Number(b.dataset.id)); break;
+    case 'rv-back': if(S.result && S.curTest===S.rv.id) viewResult(); else viewHome(); break;
     case 'start': startTest(Number(b.dataset.id)); break;
     case 'pick': pick(Number(b.dataset.i)); break;
     case 'go': S.idx = Number(b.dataset.i); viewTest(); break;
@@ -691,6 +788,9 @@ document.addEventListener('click', async e => {
     case 'refresh': if(await adminLoad()) paneRes(true); break;
     case 'sort': { const k = b.dataset.k; if(A.sort.k===k) A.sort.d = -A.sort.d; else A.sort = { k, d:1 }; paneRes(true); break; }
     case 'csv': csv(); break;
+    case 'tset': openTset(Number(b.dataset.id)); break;
+    case 'tset-cancel': document.querySelectorAll('.modal').forEach(m => m.remove()); break;
+    case 'tset-save': saveTset(Number(b.dataset.id)); break;
     case 'qa-csv': csvQa(); break;
     case 'qa-refresh': if(await adminLoad()){ A.qa.key=''; qaLoad(); } break;
     case 'toggle': { try{ await rpc('admin_set_active', { p_user:A.u, p_password:A.p, p_test_id:Number(b.dataset.id), p_active: b.dataset.v==='1' }); await adminLoad(); }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; } viewAdmin(); break; }
