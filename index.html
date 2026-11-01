@@ -252,7 +252,7 @@ function langSwitch(){
 
 /* ====================== HOLAT ====================== */
 const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null, w5:false, w1:false };
-const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null };
+const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null, qa:{ rows:null, key:'', sort:'pct' } };
 
 function clearTimers(){ if(S.timer){clearInterval(S.timer);S.timer=null;} if(A.poll){clearInterval(A.poll);A.poll=null;} }
 function fmt(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
@@ -464,12 +464,12 @@ function baho(c,tot){ if(!tot) return ''; const p = 100*c/tot; return p>=86?5 : 
 function viewAdmin(){
   clearTimers();
   app.className = 'wrap wide';
-  const tabs = [['res','Natijalar'],['tests','Testlar'],['set','Sozlamalar']].map(([k,n]) => `<button data-act="atab" data-v="${k}" class="${A.tab===k?'on':''}">${n}</button>`).join('');
+  const tabs = [['res','Natijalar'],['qa','Savollar tahlili'],['tests','Testlar'],['set','Sozlamalar']].map(([k,n]) => `<button data-act="atab" data-v="${k}" class="${A.tab===k?'on':''}">${n}</button>`).join('');
   app.innerHTML = `<div class="top">${brand("O'qituvchi paneli")}<div class="row tools"><span class="mute small">${esc(A.u)}</span>${themeBtn()}<button class="btn sec sm" data-act="alogout">Chiqish</button></div></div>
     <div class="tabs">${tabs}</div><div id="pane"></div>`;
   if(A.msg){ toast(A.msg.t, A.msg.bad); A.msg = null; }
   if(A.tab==='res'){ paneRes(); A.poll = setInterval(async () => { if(await adminLoad()) { paneRes(true); } }, 30000); }
-  else if(A.tab==='tests') paneTests(); else paneSet();
+  else if(A.tab==='qa') paneQa(); else if(A.tab==='tests') paneTests(); else paneSet();
 }
 /* test, sinf va guruh bo'yicha tanlangan qatorlar */
 function baseRows(){
@@ -545,6 +545,74 @@ function paneRes(keepScroll){
   const nt = pane.querySelector('.tw'); if(nt && keepScroll) nt.scrollTop = sc;
   if(fkey){ const el = pane.querySelector(`[data-f="${fkey}"]`); if(el){ el.focus(); try{ if(fpos!=null) el.setSelectionRange(fpos, fpos); }catch(e){} } }
 }
+/* ---------- Savollar tahlili ---------- */
+async function qaLoad(){
+  const key = A.f.test+'|'+A.f.cls+'|'+A.f.grp;
+  A.qa.rows = null; A.qa.key = key; paneQa();
+  try{
+    const r = await rpc('admin_question_stats', { p_user:A.u, p_password:A.p, p_test_id:Number(A.f.test), p_class:A.f.cls||null, p_grp:A.f.grp?Number(A.f.grp):null });
+    if(A.qa.key!==key) return;
+    if(!r.ok){ A.qa.rows = []; A.msg = {bad:true,t:'Ruxsat yo‘q'}; } else A.qa.rows = r.rows;
+  }catch(e){ A.qa.rows = []; toast('Aloqa xatosi. Agar 06_tahlil.sql ishga tushirilmagan bo‘lsa, avval uni Supabase’da Run qiling.', true); }
+  if(A.tab==='qa') paneQa();
+}
+function qaRows(){
+  const rows = (A.qa.rows||[]).slice();
+  const k = A.qa.sort;
+  const val = r => r.pct===null ? 999 : r.pct;
+  if(k==='pct') rows.sort((a,b) => val(a)-val(b) || b.shown-a.shown);
+  else if(k==='wrong') rows.sort((a,b) => b.wrong-a.wrong);
+  else rows.sort((a,b) => a.id-b.id);
+  return rows;
+}
+function topWrong(r){
+  const w = r.options.filter(o => !o.ok && o.n>0).sort((a,b) => b.n-a.n)[0];
+  return w || null;
+}
+function paneQa(){
+  const pane = $('#pane'); if(!pane) return;
+  const key = A.f.test+'|'+A.f.cls+'|'+A.f.grp;
+  if(A.qa.rows===null && A.qa.key!==key){ return qaLoad(); }
+  const testRows = A.rows.filter(r => String(r.test_id)===A.f.test);
+  const classes = [...new Set(testRows.map(r => r.class))].sort();
+  const groups = [...new Set(testRows.filter(r => !A.f.cls || r.class===A.f.cls).map(r => r.grp))].sort();
+  const head = `<div class="filters">
+      <div><label>Test</label><select data-qf="test">${A.tests.map(x => `<option value="${x.id}" ${String(x.id)===A.f.test?'selected':''}>${esc(x.title_uz)}</option>`).join('')}</select></div>
+      <div><label>Sinf</label><select data-qf="cls"><option value="">Hammasi</option>${classes.map(c => `<option ${c===A.f.cls?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+      <div><label>Guruh</label><select data-qf="grp"><option value="">Hammasi</option>${groups.map(g => `<option ${String(g)===A.f.grp?'selected':''}>${g}</option>`).join('')}</select></div>
+      <div><label>Tartib</label><select data-qf="sort"><option value="pct" ${A.qa.sort==='pct'?'selected':''}>Eng qiyinlari tepada</option><option value="wrong" ${A.qa.sort==='wrong'?'selected':''}>Xatolar soni bo‘yicha</option><option value="id" ${A.qa.sort==='id'?'selected':''}>Savol tartibi bo‘yicha</option></select></div>
+      <button class="btn sec" data-act="qa-refresh">Yangilash</button><button class="btn" data-act="qa-csv">Excel (CSV)</button></div>`;
+  if(A.qa.rows===null){ pane.innerHTML = head + `<div class="panel">${tu('loading')}</div>`; return; }
+  const rows = qaRows();
+  const asked = rows.filter(r => r.shown>0);
+  const body = rows.map((r,i) => {
+    const w = topWrong(r);
+    const cls = r.pct===null ? '' : r.pct<40 ? 'g2' : r.pct>=85 ? 'g5' : '';
+    const det = r.options.map(o => `<div class="r ${o.ok?'g5':''}" style="display:grid;grid-template-columns:28px 1fr 40px;gap:10px;margin:4px 0"><b>${'ABCDEFGH'[o.i]}${o.ok?' ✓':''}</b><span>${esc(o.uz)}<br><span class="mute small">${esc(o.kk)}</span></span><span class="n">${o.n}</span></div>`).join('');
+    return `<tr><td class="n">${i+1}</td>
+      <td style="white-space:normal;min-width:280px;max-width:460px"><details><summary style="cursor:pointer">${esc(r.q_uz)}</summary>
+        <div class="mute small" style="margin:6px 0">${esc(r.q_kk)}</div>${det}</details></td>
+      <td class="small mute" style="white-space:normal;max-width:180px">${esc(r.topic||'')}</td>
+      <td class="n">${r.shown}</td><td class="n ${cls}">${r.pct===null?'—':r.pct+'%'}</td><td class="n">${r.wrong}</td>
+      <td style="white-space:normal;max-width:260px">${w ? `${'ABCDEFGH'[w.i]}) ${esc(w.uz)} <span class="mute">(${w.n} ta)</span>` : '<span class="mute">—</span>'}</td></tr>`;
+  }).join('');
+  pane.innerHTML = head + `
+    <p class="mute small" style="margin-top:0">Faqat yakunlangan urinishlar hisoblanadi. Savolni bossangiz, barcha variantlar va har birini nechta o‘quvchi tanlagani ko‘rinadi. Javob bermagan savollar xato hisoblanadi. Hozir tahlil qilingan: <b>${asked.length}</b> ta savol bo‘yicha javoblar bor (jami ${rows.length} ta).</p>
+    <div class="tw"><table><thead><tr><th>№</th><th>Savol</th><th>Mavzu</th><th>Berilgan</th><th>To‘g‘ri %</th><th>Xato</th><th>Eng ko‘p tanlangan noto‘g‘ri variant</th></tr></thead><tbody>${body}</tbody></table>
+    ${rows.length ? '' : '<div class="empty">Bu testda savol yo‘q.</div>'}</div>
+    <p class="mute small" style="margin-bottom:0">“Berilgan” — savol necha o‘quvchiga tushgan (savollar tasodifiy tanlanadi, shuning uchun har bir savolga o‘quvchilar soni har xil). To‘g‘ri % 40 dan kam bo‘lsa qizil, 85 dan ko‘p bo‘lsa yashil.</p>`;
+}
+function csvQa(){
+  const rows = qaRows(); const test = A.tests.find(x => String(x.id)===A.f.test);
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const lines = [['№','Savol (uz)','Savol (kk)','Mavzu','Berilgan','Javob bergan','To\'g\'ri','Xato','To\'g\'ri %','Eng ko\'p tanlangan noto\'g\'ri variant','Shu variantni tanlaganlar','A','B','C','D','E'].map(q).join(',')];
+  rows.forEach((r,i) => { const w = topWrong(r);
+    lines.push([i+1,r.q_uz,r.q_kk,r.topic,r.shown,r.answered,r.correct,r.wrong,r.pct ?? '', w?w.uz:'', w?w.n:'',
+      ...[0,1,2,3,4].map(k => { const o = r.options[k]; return o ? o.n + (o.ok?' (to\'g\'ri)':'') : ''; })].map(q).join(',')); });
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'savollar_tahlili_' + (A.f.cls || 'hammasi') + (A.f.grp ? '_g'+A.f.grp : '') + '_test' + (test ? test.id : '') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
 function paneTests(){
   $('#pane').innerHTML = `<div class="panel"><h2 style="margin-bottom:12px">Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Holat</th><th></th></tr></thead><tbody>
     ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n">${x.duration_min} daq</td>
@@ -591,6 +659,9 @@ document.addEventListener('submit', async e => {
   }
 });
 document.addEventListener('change', e => {
+  const qf = e.target.dataset && e.target.dataset.qf;
+  if(qf){ if(qf==='sort'){ A.qa.sort = e.target.value; return paneQa(); }
+    A.f[qf] = e.target.value; if(qf==='cls') A.f.grp = ''; A.qa.rows = null; A.qa.key = ''; return paneQa(); }
   const f = e.target.dataset && e.target.dataset.f; if(!f || f==='q') return;
   A.f[f] = e.target.value; if(f==='cls') A.f.grp = ''; paneRes();
 });
@@ -620,6 +691,8 @@ document.addEventListener('click', async e => {
     case 'refresh': if(await adminLoad()) paneRes(true); break;
     case 'sort': { const k = b.dataset.k; if(A.sort.k===k) A.sort.d = -A.sort.d; else A.sort = { k, d:1 }; paneRes(true); break; }
     case 'csv': csv(); break;
+    case 'qa-csv': csvQa(); break;
+    case 'qa-refresh': if(await adminLoad()){ A.qa.key=''; qaLoad(); } break;
     case 'toggle': { try{ await rpc('admin_set_active', { p_user:A.u, p_password:A.p, p_test_id:Number(b.dataset.id), p_active: b.dataset.v==='1' }); await adminLoad(); }catch(err){ A.msg={bad:true,t:'Aloqa xatosi'}; } viewAdmin(); break; }
     case 'reopen': {
       const r = A.rows.find(x => String(x.student_id)===b.dataset.s && String(x.test_id)===b.dataset.t);
