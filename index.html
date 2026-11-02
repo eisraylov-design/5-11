@@ -283,7 +283,7 @@ function langSwitch(){
 
 /* ====================== HOLAT ====================== */
 const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null, w5:false, w1:false };
-const G = { on:false, away:false, t0:0, startedAt:0, fs:false, leaveP:null, ended:false, wt:null };
+const G = { poll:null, on:false, away:false, t0:0, startedAt:0, fs:false, leaveP:null, ended:false, wt:null };
 const WARN_MAX = 3;
 const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null, qa:{ rows:null, key:'', sort:'pct' } };
 
@@ -308,9 +308,27 @@ function enterFs(){
   }catch(e){}
 }
 function exitFs(){ try{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); }catch(e){} }
-function guardStart(){ G.on = !!(S.att && S.att.guard); G.away = false; G.ended = false; G.startedAt = Date.now(); G.leaveP = null; document.body.classList.add('testing'); }
-function guardStop(){ G.on = false; G.away = false; closeWarn(); document.body.classList.remove('testing'); if(G.fs){ G.fs = false; } exitFs(); }
-function isAway(){ return document.hidden || !document.hasFocus() || (G.fs && !document.fullscreenElement); }
+function guardStart(){
+  G.on = !!(S.att && S.att.guard); G.away = false; G.ended = false; G.startedAt = Date.now(); G.leaveP = null; document.body.classList.add('testing');
+  if(G.poll) clearInterval(G.poll);
+  G.poll = setInterval(() => guardCheck('blur'), 700);   /* hodisa o'tkazib yuborilsa ham ushlash uchun */
+}
+function guardStop(){ if(G.poll){ clearInterval(G.poll); G.poll = null; } G.on = false; G.away = false; closeWarn(); document.body.classList.remove('testing'); if(G.fs){ G.fs = false; } exitFs(); }
+/* Faqat oyna ko'rinishi va fokusi hisobga olinadi (to'liq ekran alohida tekshiriladi, aks holda holat qotib qoladi) */
+function isAway(){ return document.hidden || !document.hasFocus(); }
+/* bir lahzali buzilish: to'liq ekrandan chiqish, ekran suratga olish tugmasi */
+function instantLeave(reason){
+  if(!G.on || !S.att || S.busy || G.away) return;
+  if(Date.now() - G.startedAt < 2500) return;
+  qtFlush(); reportLeave(reason); instantWarn();
+}
+async function instantWarn(){
+  const r = await G.leaveP;
+  if(!S.att) return;
+  if(G.ended) return showEnded();
+  if(r && r.ok && r.count === 0) return;
+  showWarn(r && r.ok ? r.count : Math.max(1, S.leaves || 0));
+}
 function qtFlush(){
   if(!S.att) return;
   const now = Date.now(), q = S.att.questions[S.idx];
@@ -368,15 +386,22 @@ function showEnded(){
 window.addEventListener('blur', () => guardCheck('blur'));
 window.addEventListener('focus', () => guardCheck('focus'));
 document.addEventListener('visibilitychange', () => guardCheck(document.hidden ? 'hidden' : 'visible'));
-document.addEventListener('fullscreenchange', () => guardCheck('fullscreen'));
+document.addEventListener('fullscreenchange', () => {
+  if(!G.on || !S.att) return;
+  if(document.fullscreenElement){ G.fs = true; return; }
+  if(!G.fs) return;
+  /* oyna almashtirish tufayli chiqqan bo'lsa u allaqachon "chiqish" sifatida sanalgan: biroz kutib tekshiramiz */
+  setTimeout(() => { if(G.on && S.att && G.fs && !document.fullscreenElement && !G.away && !isAway()) instantLeave('fullscreen'); }, 450);
+});
 /* nusxalash, o'ng tugma va ba'zi tugmalar test paytida to'siladi */
 ['contextmenu','copy','cut','paste','selectstart','dragstart'].forEach(ev => document.addEventListener(ev, e => { if(S.att) e.preventDefault(); }));
 document.addEventListener('keydown', e => {
   if(!S.att) return;
   const k = (e.key || '').toLowerCase();
+  if(e.metaKey && e.shiftKey && k === 's'){ instantLeave('screenshot'); }
   if(e.key === 'F12' || e.key === 'PrintScreen' || ((e.ctrlKey || e.metaKey) && (['c','x','a','u','s','p','f','g','i','j'].includes(k) || (e.shiftKey && ['i','j','c','s'].includes(k))))){ e.preventDefault(); e.stopPropagation(); }
 }, true);
-document.addEventListener('keyup', e => { if(S.att && e.key === 'PrintScreen'){ try{ navigator.clipboard.writeText(' '); }catch(err){} } });
+document.addEventListener('keyup', e => { if(S.att && e.key === 'PrintScreen'){ try{ navigator.clipboard.writeText(' ').catch(()=>{}); }catch(err){} instantLeave('screenshot'); } });
 
 /* ====================== LOGIN ====================== */
 function viewLogin(err){
@@ -736,7 +761,7 @@ async function openLog(sid, tid){
   try{ r = await rpc('admin_attempt_log', { p_user:A.u, p_password:A.p, p_student_id:Number(sid), p_test_id:Number(tid) }); }
   catch(e){ return toast('Aloqa xatosi. 09_nazorat.sql Supabase’da Run qilinganmi?', true); }
   if(!r.ok) return toast('Ma’lumot topilmadi.', true);
-  const why = { blur:'Oynadan chiqdi (boshqa oyna yoki dastur)', hidden:'Vkladka yoki oyna yashirildi', fullscreen:'To‘liq ekrandan chiqdi' };
+  const why = { blur:'Oynadan chiqdi (boshqa oyna yoki dastur)', hidden:'Vkladka yoki oyna yashirildi', fullscreen:'To‘liq ekrandan chiqdi (Esc yoki F11)', screenshot:'Ekran suratga olish tugmasi bosildi (Print Screen)' };
   const lv = r.leaves.map((l,i) => `<tr><td class="n">${i+1}</td><td>${esc(ftime(l.t))}</td><td style="white-space:normal">${esc(why[l.r] || l.r)}</td><td>${l.q ? l.q+'-savolda' : ''}</td><td>${l.d!=null ? l.d+' soniya' : '—'}</td></tr>`).join('');
   const it = r.items.map(z => `<tr><td class="n">${z.n}</td><td style="white-space:normal;min-width:240px">${esc(z.q_uz.length>80 ? z.q_uz.slice(0,80)+'…' : z.q_uz)}</td><td class="n">${z.sec!=null ? Math.round(z.sec)+' s' : '—'}</td><td class="n ${z.ok===true?'g5':z.ok===false?'g2':''}">${z.ok===true?'✓':z.ok===false?'✗':(z.answered?'':'javobsiz')}</td></tr>`).join('');
   const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
