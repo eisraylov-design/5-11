@@ -165,7 +165,18 @@ td.n{text-align:right;font-variant-numeric:tabular-nums}
 .opt.rv-ok .k{background:var(--ok);border-color:var(--ok);color:#fff}.opt.rv-bad .k{background:var(--bad);border-color:var(--bad);color:var(--on-bad)}
 .tag{display:inline-block;font-size:13px;font-weight:600;margin-left:8px}
 .modal .box.scroll{max-height:90vh;overflow:auto}
-@media print{.top,.tabs,.filters,.btn,#toasts{display:none!important}body{background:#fff}}
+body.testing,body.testing *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.modal.warn{z-index:60;background:rgba(8,12,16,.72)}
+.warn .box{text-align:center;border:3px solid var(--warn)}
+.warn .ic{font-size:46px;line-height:1;margin-bottom:6px}
+.warn .wt{font-size:24px;font-weight:800;margin:0 0 10px}
+.warn.l2{background:rgba(120,55,0,.78)}.warn.l2 .box{border-color:#E07B00;background:var(--warn-t)}
+.warn.l3,.warn.end{background:rgba(110,10,10,.94)}.warn.l3 .box,.warn.end .box{border-color:var(--bad);background:var(--bad-t);max-width:640px;padding:36px 28px}
+.warn.l3 .wt,.warn.end .wt{font-size:32px;color:var(--bad)}
+.guardb{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.warn.l2 .box{animation:shk .45s}.warn.l3 .box,.warn.end .box{animation:shk .7s}}
+@keyframes shk{0%,100%{transform:none}15%{transform:translateX(-10px)}30%{transform:translateX(9px)}45%{transform:translateX(-7px)}60%{transform:translateX(5px)}80%{transform:translateX(-2px)}}
+@media print{body.testing #app{display:none!important}.top,.tabs,.filters,.btn,#toasts{display:none!important}body{background:#fff}}
 </style>
 </head>
 <body>
@@ -189,11 +200,11 @@ const ss = { get(k){ try{ return sessionStorage.getItem(k); }catch(e){ return me
 const ls = { get(k){ try{ return localStorage.getItem(k); }catch(e){ return mem['ls'+k] ?? null; } },
              set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem['ls'+k]=v; } } };
 
-async function rpc(fn, args){
+async function rpc(fn, args, keep){
   const h = { 'Content-Type':'application/json', 'apikey': CFG.KEY };
   if (CFG.KEY.startsWith('eyJ')) h['Authorization'] = 'Bearer ' + CFG.KEY;
   let r;
-  try { r = await fetch(CFG.URL.replace(/\/+$/,'') + '/rest/v1/rpc/' + fn, { method:'POST', headers:h, body: JSON.stringify(args) }); }
+  try { r = await fetch(CFG.URL.replace(/\/+$/,'') + '/rest/v1/rpc/' + fn, { method:'POST', headers:h, body: JSON.stringify(args), keepalive: !!keep }); }
   catch(e){ throw new Error('net'); }
   if (!r.ok) throw new Error('http' + r.status);
   return r.json();
@@ -236,6 +247,11 @@ const T = {
   show:'Көрсету', hide:'Жасыру', theme:'Жарық / түнгі режим', answered:'жауап берілді',
   keys:'Жауап таңдау: 1–4 немесе A–D. Сұрақтар арасында: ← →',
   offline:'Интернет жоқ. Байланысты тексеріңіз.', online:'Байланыс қалпына келді.', min5:'Тестке 5 минут қалды', min1:'Тестке 1 минут қалды',
+  rules:'Назар аударыңыз: тест кезінде бет терезесінен шығуға болмайды. Басқа қойындыға, терезеге немесе бағдарламаға өту, толық экраннан шығу — барлығы жазылып, мұғалімге көрінеді. 3 ескертуден кейін 4-шығуда тест сол жерде аяқталады, тек берген жауаптарыңыз есептеледі.',
+  w1t:'Ескерту 1 / 3', w1b:'Сіз тест бетінен шықтыңыз. Бұл бірінші ескерту. Тест кезінде басқа терезеге өтпеңіз.',
+  w2t:'Ескерту 2 / 3 — қайталандыңыз!', w2b:'Сіз тест бетінен қайтадан шықтыңыз. Әрбір шығуыңыз мұғалімге көрінеді. Тағы екі рет қайталасаңыз, тест аяқталады.',
+  w3t:'СОҢҒЫ ЕСКЕРТУ 3 / 3', w3b:'Тағы бір рет шықсаңыз, тест ОСЫ ЖЕРДЕ аяқталады және тек берген жауаптарыңыз есептеледі!',
+  wOk:'Түсіндім, жалғастырамын', wWait:'Күтіңіз', endT:'Тест аяқталды', endB:'Тест бетінен 4 рет шыққаныңыз үшін тест аяқталды. Берген жауаптарыңыз есептелді.',
   review:'Қателерді қарау', reviewTitle:'Қателерді талдау', yourAns:'Сіздің жауабыңыз', rightAns:'Дұрыс жауап', noAns:'Жауап берілмеген', back:'Артқа', nolimit:'Уақыт шектелмеген',
   soon:'Әлі ашылмаған', closedS:'Уақыты өтті', until:'дейін', since:'бастап', notOpen:'Бұл тест әлі ашылмаған.', closedMsg:'Бұл тесттің уақыты өтті.', noReview:'Талдау қолжетімді емес.' },
  uz:{ title:'Informatika testi', login:'Login', password:'Parol', signin:'Kirish', teacher:"O'qituvchi uchun kirish", bad:"Login yoki parol noto'g'ri",
@@ -250,6 +266,11 @@ const T = {
   show:'Ko‘rsatish', hide:'Yashirish', theme:'Yorug‘ / qorong‘i rejim', answered:'javob berilgan',
   keys:'Javob tanlash: 1–4 yoki A–D. Savollar orasida: ← →',
   offline:"Internet yo'q. Aloqani tekshiring.", online:'Aloqa tiklandi.', min5:'Testga 5 daqiqa qoldi', min1:'Testga 1 daqiqa qoldi',
+  rules:"Diqqat: test paytida sahifadan chiqish mumkin emas. Boshqa vkladka, oyna yoki dasturga o'tish va to'liq ekrandan chiqish — hammasi yozib boriladi va o'qituvchiga ko'rinadi. 3 ta ogohlantirishdan keyin 4-chi chiqishda test shu zahoti tugatiladi, faqat bergan javoblaringiz hisoblanadi.",
+  w1t:'Ogohlantirish 1 / 3', w1b:"Siz test sahifasidan chiqdingiz. Bu birinchi ogohlantirish. Test paytida boshqa oynaga o'tmang.",
+  w2t:'Ogohlantirish 2 / 3 — takrorlandi!', w2b:"Siz sahifadan yana chiqdingiz. Har bir chiqishingiz o'qituvchiga ko'rinadi. Yana ikki marta takrorlansa, test tugatiladi.",
+  w3t:'OXIRGI OGOHLANTIRISH 3 / 3', w3b:"Yana bir marta chiqsangiz, test SHU YERDA tugatiladi va faqat bergan javoblaringiz hisoblanadi!",
+  wOk:'Tushundim, davom etaman', wWait:'Kuting', endT:'Test tugatildi', endB:"Test sahifasidan 4 marta chiqqaningiz uchun test tugatildi. Bergan javoblaringiz hisoblandi.",
   review:"Xatolarni ko'rish", reviewTitle:'Xatolar tahlili', yourAns:'Sizning javobingiz', rightAns:"To'g'ri javob", noAns:'Javob berilmagan', back:'Orqaga', nolimit:'Vaqt cheklanmagan',
   soon:'Hali ochilmagan', closedS:'Vaqti tugagan', until:'gacha', since:'dan', notOpen:'Bu test hali ochilmagan.', closedMsg:'Bu testning vaqti tugagan.', noReview:'Tahlil mavjud emas.' }
 };
@@ -262,6 +283,8 @@ function langSwitch(){
 
 /* ====================== HOLAT ====================== */
 const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null, w5:false, w1:false };
+const G = { on:false, away:false, t0:0, startedAt:0, fs:false, leaveP:null, ended:false, wt:null };
+const WARN_MAX = 3;
 const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null, qa:{ rows:null, key:'', sort:'pct' } };
 
 const p2 = n => String(n).padStart(2,'0');
@@ -273,10 +296,87 @@ function winText(o, c){
   if(c) return fdt(c)+' '+t('until');
   return '';
 }
-function clearTimers(){ if(S.timer){clearInterval(S.timer);S.timer=null;} if(A.poll){clearInterval(A.poll);A.poll=null;} }
+function clearTimers(){ guardStop(); if(S.timer){clearInterval(S.timer);S.timer=null;} if(A.poll){clearInterval(A.poll);A.poll=null;} }
 function fmt(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
 const stTitle = x => lang==='uz' ? x.title_uz : x.title_kk;
 function setupBanner(){ return configured() ? '' : `<div class="note"><b>${t('setup')}</b> index.html ichida <code>CFG</code> (URL va KEY) ni to'ldiring.</div>`; }
+
+/* ====================== NAZORAT (sahifadan chiqishni kuzatish) ====================== */
+function enterFs(){
+  try{ const el = document.documentElement;
+    if(el.requestFullscreen && !document.fullscreenElement){ el.requestFullscreen().then(() => { G.fs = true; }).catch(() => { G.fs = false; }); }
+  }catch(e){}
+}
+function exitFs(){ try{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); }catch(e){} }
+function guardStart(){ G.on = !!(S.att && S.att.guard); G.away = false; G.ended = false; G.startedAt = Date.now(); G.leaveP = null; document.body.classList.add('testing'); }
+function guardStop(){ G.on = false; G.away = false; closeWarn(); document.body.classList.remove('testing'); if(G.fs){ G.fs = false; } exitFs(); }
+function isAway(){ return document.hidden || !document.hasFocus() || (G.fs && !document.fullscreenElement); }
+function qtFlush(){
+  if(!S.att) return;
+  const now = Date.now(), q = S.att.questions[S.idx];
+  if(S.qCurId != null && S.qStart && !document.hidden && !G.away){
+    const d = Math.min(1800, (now - S.qStart) / 1000);
+    S.qt[S.qCurId] = Math.round(((S.qt[S.qCurId] || 0) + d) * 10) / 10;
+  }
+  S.qStart = now; S.qCurId = q ? q.id : null;
+}
+function paintBadge(){ const b = $('#gb'); if(!b) return; b.hidden = !S.leaves; b.textContent = '⚠ ' + S.leaves + '/' + WARN_MAX; }
+function guardCheck(reason){
+  if(!G.on || !S.att || S.busy) return;
+  if(Date.now() - G.startedAt < 2500) return;
+  const away = isAway();
+  if(away && !G.away){ qtFlush(); G.away = true; G.t0 = Date.now(); reportLeave(reason); }
+  else if(!away && G.away){ G.away = false; S.qStart = Date.now(); onReturn(); }
+}
+function reportLeave(reason){
+  const a = S.att; if(!a) return;
+  G.leaveP = rpc('student_leave', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:a.attempt_id,
+      p_reason: reason==='visibilitychange' ? 'hidden' : reason, p_q:S.idx+1, p_answers:S.ans, p_times:S.qt }, true)
+    .then(r => { if(r && r.ok){ S.leaves = r.count; if(r.ended){ G.ended = true; S.result = r.result; } paintBadge(); } return r; })
+    .catch(() => null);
+}
+async function onReturn(){
+  const sec = Math.round((Date.now() - G.t0) / 1000);
+  const aid = S.att ? S.att.attempt_id : null;
+  const r = await G.leaveP;
+  if(!S.att) return;
+  if(G.ended){ return showEnded(); }
+  if(r && r.ok && r.count > 0 && aid) rpc('student_back', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:aid, p_sec:sec }).catch(()=>{});
+  if(r && r.ok && r.count === 0) return;          /* server nazoratni sanamadi (nazorat o'chiq) */
+  showWarn(r && r.ok ? r.count : Math.max(1, S.leaves || 0));
+}
+function closeWarn(){ if(G.wt){ clearInterval(G.wt); G.wt = null; } const m = document.getElementById('warn'); if(m) m.remove(); }
+function showWarn(n){
+  closeWarn();
+  const lv = Math.min(3, Math.max(1, n)), lock = [0,0,5,10][lv];
+  const m = document.createElement('div'); m.className = 'modal warn l' + lv; m.id = 'warn'; m.setAttribute('role','alertdialog'); m.setAttribute('aria-modal','true');
+  m.innerHTML = `<div class="box"><div class="ic" aria-hidden="true">${['','⚠️','⛔','🚫'][lv]}</div><h2 class="wt">${esc(t('w'+lv+'t'))}</h2>
+    <p style="font-size:${lv===3?20:17}px;margin:0 0 18px">${esc(t('w'+lv+'b'))}</p><button class="btn block" data-act="warn-ok" style="margin-top:0"></button></div>`;
+  m.addEventListener('keydown', e => { if(e.key === 'Escape') e.preventDefault(); });
+  document.body.appendChild(m);
+  const b = m.querySelector('button'); let left = lock;
+  const upd = () => { b.disabled = left > 0; b.textContent = left > 0 ? t('wWait') + ' (' + left + ')' : t('wOk'); };
+  upd(); if(!b.disabled) b.focus();
+  if(left > 0){ G.wt = setInterval(() => { left--; upd(); if(left <= 0){ clearInterval(G.wt); G.wt = null; b.focus(); } }, 1000); }
+}
+function showEnded(){
+  clearInterval(S.timer); S.timer = null; clearTimeout(S.saveT); closeWarn(); guardStop(); S.att = null;
+  const m = document.createElement('div'); m.className = 'modal warn end'; m.id = 'warn'; m.setAttribute('role','alertdialog'); m.setAttribute('aria-modal','true');
+  m.innerHTML = `<div class="box"><div class="ic" aria-hidden="true">🚫</div><h2 class="wt">${esc(t('endT'))}</h2><p style="font-size:19px;margin:0 0 18px">${esc(t('endB'))}</p><button class="btn block" data-act="ended-ok" style="margin-top:0">OK</button></div>`;
+  document.body.appendChild(m); m.querySelector('button').focus();
+}
+window.addEventListener('blur', () => guardCheck('blur'));
+window.addEventListener('focus', () => guardCheck('focus'));
+document.addEventListener('visibilitychange', () => guardCheck(document.hidden ? 'hidden' : 'visible'));
+document.addEventListener('fullscreenchange', () => guardCheck('fullscreen'));
+/* nusxalash, o'ng tugma va ba'zi tugmalar test paytida to'siladi */
+['contextmenu','copy','cut','paste','selectstart','dragstart'].forEach(ev => document.addEventListener(ev, e => { if(S.att) e.preventDefault(); }));
+document.addEventListener('keydown', e => {
+  if(!S.att) return;
+  const k = (e.key || '').toLowerCase();
+  if(e.key === 'F12' || e.key === 'PrintScreen' || ((e.ctrlKey || e.metaKey) && (['c','x','a','u','s','p','f','g','i','j'].includes(k) || (e.shiftKey && ['i','j','c','s'].includes(k))))){ e.preventDefault(); e.stopPropagation(); }
+}, true);
+document.addEventListener('keyup', e => { if(S.att && e.key === 'PrintScreen'){ try{ navigator.clipboard.writeText(' '); }catch(err){} } });
 
 /* ====================== LOGIN ====================== */
 function viewLogin(err){
@@ -347,19 +447,21 @@ function confirmBox(text, yes, no, onYes){
 async function startTest(id){
   const x = S.tests.find(z => z.id === id); if(!x) return;
   const go = async () => {
+    if(x.guard) enterFs();       /* foydalanuvchi bosgan lahzada: to'liq ekran */
     app.innerHTML = `<div class="panel">${t('loading')}</div>`;
     try{
       const r = await rpc('student_start', { p_login: S.creds.l, p_password: S.creds.p, p_test_id: id });
-      if(!r.ok){ return viewHome(r.error==='no_test' ? t('nt') : r.error==='no_questions' ? t('noq') : r.error==='not_open' ? t('notOpen') : r.error==='closed' ? t('closedMsg') : t('bad')); }
+      if(!r.ok){ exitFs(); return viewHome(r.error==='no_test' ? t('nt') : r.error==='no_questions' ? t('noq') : r.error==='not_open' ? t('notOpen') : r.error==='closed' ? t('closedMsg') : t('bad')); }
       S.curTest = id;
-      if(r.done){ S.result = r.result; return viewResult(); }
+      if(r.done){ exitFs(); S.result = r.result; return viewResult(); }
       S.att = r; S.ans = r.answers || {}; S.idx = 0; S.w5 = false; S.w1 = false;
+      S.qt = r.q_times || {}; S.leaves = r.leaves || 0; S.qCurId = null; S.qStart = Date.now(); guardStart();
       S.deadline = r.deadline ? Date.parse(r.deadline) - (Date.parse(r.server_now) - Date.now()) : Infinity;
       viewTest();
       S.timer = setInterval(tick, 500);
-    }catch(e){ viewHome(t('net')); }
+    }catch(e){ exitFs(); viewHome(t('net')); }
   };
-  if (x.status === 'in_progress') go(); else confirmBox(esc(t('askStart')), t('start'), t('cancel'), go);
+  if (x.status === 'in_progress') go(); else confirmBox(esc(t('askStart')) + (x.guard ? `<p class="small" style="margin:12px 0 0;padding:10px 12px;border-radius:8px;background:var(--warn-t);color:var(--warn)">${esc(t('rules'))}</p>` : ''), t('start'), t('cancel'), go);
 }
 
 /* ====================== TEST ====================== */
@@ -372,6 +474,7 @@ function tick(){
   if(left <= 0 && !S.busy){ finish(true); }
 }
 function viewTest(){
+  qtFlush();
   app.className = 'wrap testw';
   const a = S.att, q = a.questions[S.idx], n = a.questions.length;
   const opts = (lang==='uz' ? q.opts_uz : q.opts_kk).map((o,i) =>
@@ -379,7 +482,7 @@ function viewTest(){
   const nav = a.questions.map((z,i) => `<button data-act="go" data-i="${i}" aria-label="${t('q')} ${i+1}" class="${S.ans[z.id]!==undefined?'ans':''} ${i===S.idx?'cur':''}">${i+1}</button>`).join('');
   app.innerHTML = `
   <div class="top sticky">${brand(lang==='uz'?a.title_uz:a.title_kk)}
-    <div class="row tools">${langSwitch()}${themeBtn()}<span class="timer" id="tm" role="timer">--:--</span></div></div>
+    <div class="row tools">${langSwitch()}${themeBtn()}${a.guard ? `<span class="badge b-wip guardb" id="gb" ${S.leaves?'':'hidden'}>⚠ ${S.leaves}/${WARN_MAX}</span>` : ''}<span class="timer" id="tm" role="timer">--:--</span></div></div>
   <div class="testgrid">
     <section>
       <div class="panel">
@@ -416,7 +519,7 @@ function pick(i){
 }
 function queueSave(){
   clearTimeout(S.saveT);
-  S.saveT = setTimeout(() => { if(S.att) rpc('student_save', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans }).catch(()=>{}); }, 500);
+  S.saveT = setTimeout(() => { if(S.att){ qtFlush(); rpc('student_save', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans, p_times:S.qt }).catch(()=>{}); } }, 500);
 }
 function askFinish(){
   const un = S.att.questions.map((z,i) => S.ans[z.id]===undefined ? i+1 : null).filter(Boolean);
@@ -424,11 +527,11 @@ function askFinish(){
   confirmBox(txt, t('yes'), t('no'), () => finish(false));
 }
 async function finish(auto){
-  if(S.busy) return; S.busy = true; clearInterval(S.timer); S.timer = null; clearTimeout(S.saveT);
+  if(S.busy) return; qtFlush(); S.busy = true; clearInterval(S.timer); S.timer = null; clearTimeout(S.saveT); guardStop();
   document.querySelectorAll('.modal').forEach(m => m.remove());
   app.innerHTML = `<div class="panel"><h2>${auto ? t('timeup') : t('saving')}</h2></div>`;
   try{
-    const r = await rpc('student_submit', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans });
+    const r = await rpc('student_submit', { p_login:S.creds.l, p_password:S.creds.p, p_attempt_id:S.att.attempt_id, p_answers:S.ans, p_times:S.qt });
     if(!r.ok) throw new Error('x');
     S.busy = false; S.result = r.result; S.att = null; viewResult();
   }catch(e){
@@ -574,6 +677,8 @@ function paneRes(keepScroll){
     return `<tr><td class="n">${i+1}</td><td>${esc(r.surname)} ${esc(r.name)}</td><td>${esc(r.class)}</td><td>${r.grp ?? ''}</td><td>${st}</td>
       <td class="n">${r.status==='done' ? r.correct+' / '+r.total : ''}</td><td class="n">${r.status==='done' ? Math.round(100*r.correct/r.total)+'%' : ''}</td>
       <td class="n ${b===5?'g5':b===2?'g2':''}">${b}</td>
+      <td class="n">${r.status==='done' && r.spent_sec!=null ? fmtMin(r.spent_sec) : ''}</td>
+      <td class="n">${r.status!=='new' ? `<button class="link" data-act="alog" data-s="${r.student_id}" data-t="${r.test_id}" style="text-decoration:none;font-weight:800;color:${r.leaves>=4?'var(--bad)':r.leaves>0?'var(--warn)':'var(--mute)'}" title="Tafsilot">${r.leaves||0}</button>` : ''}</td>
       <td>${r.status!=='new' ? `<button class="btn sec sm" data-act="reopen" data-s="${r.student_id}" data-t="${r.test_id}">Qayta ochish</button>` : ''}</td></tr>`;
   }).join('');
   const opt = (v,l) => `<option value="${v}" ${A.f.st===v?'selected':''}>${l}</option>`;
@@ -593,7 +698,7 @@ function paneRes(keepScroll){
     </div>
     ${done.length ? `<div class="dist" aria-label="Baholar taqsimoti">${dist}</div>` : ''}
     ${test ? '' : '<p class="mute">Test yo‘q.</p>'}
-    <div class="tw"><table><thead><tr><th>№</th>${th('name','F.I.Sh')}${th('cls','Sinf')}<th>Guruh</th>${th('st','Holat')}<th>To‘g‘ri</th>${th('pct','Foiz')}<th>Baho</th><th></th></tr></thead><tbody>${body}</tbody></table>
+    <div class="tw"><table><thead><tr><th>№</th>${th('name','F.I.Sh')}${th('cls','Sinf')}<th>Guruh</th>${th('st','Holat')}<th>To‘g‘ri</th>${th('pct','Foiz')}<th>Baho</th><th>Vaqt</th><th>Chiqish</th><th></th></tr></thead><tbody>${body}</tbody></table>
       ${rows.length ? '' : '<div class="empty">Bu filtrlar bo‘yicha o‘quvchi topilmadi.</div>'}</div>
     <p class="mute small" style="margin-bottom:0">Baho: 86–100% → 5, 71–85% → 4, 55–70% → 3, qolgani → 2. Jadval har 30 soniyada yangilanadi. Ustun nomini bossangiz, saralanadi.</p>`;
   const nt = pane.querySelector('.tw'); if(nt && keepScroll) nt.scrollTop = sc;
@@ -622,6 +727,29 @@ function qaRows(){
 function topWrong(r){
   const w = r.options.filter(o => !o.ok && o.n>0).sort((a,b) => b.n-a.n)[0];
   return w || null;
+}
+const fmtMin = sec => Math.floor(sec/60) + ':' + p2(Math.round(sec)%60);
+const ftime = iso => { const d = new Date(iso); return p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds()); };
+async function openLog(sid, tid){
+  const row = A.rows.find(x => String(x.student_id)===sid && String(x.test_id)===tid);
+  let r;
+  try{ r = await rpc('admin_attempt_log', { p_user:A.u, p_password:A.p, p_student_id:Number(sid), p_test_id:Number(tid) }); }
+  catch(e){ return toast('Aloqa xatosi. 09_nazorat.sql Supabase’da Run qilinganmi?', true); }
+  if(!r.ok) return toast('Ma’lumot topilmadi.', true);
+  const why = { blur:'Oynadan chiqdi (boshqa oyna yoki dastur)', hidden:'Vkladka yoki oyna yashirildi', fullscreen:'To‘liq ekrandan chiqdi' };
+  const lv = r.leaves.map((l,i) => `<tr><td class="n">${i+1}</td><td>${esc(ftime(l.t))}</td><td style="white-space:normal">${esc(why[l.r] || l.r)}</td><td>${l.q ? l.q+'-savolda' : ''}</td><td>${l.d!=null ? l.d+' soniya' : '—'}</td></tr>`).join('');
+  const it = r.items.map(z => `<tr><td class="n">${z.n}</td><td style="white-space:normal;min-width:240px">${esc(z.q_uz.length>80 ? z.q_uz.slice(0,80)+'…' : z.q_uz)}</td><td class="n">${z.sec!=null ? Math.round(z.sec)+' s' : '—'}</td><td class="n ${z.ok===true?'g5':z.ok===false?'g2':''}">${z.ok===true?'✓':z.ok===false?'✗':(z.answered?'':'javobsiz')}</td></tr>`).join('');
+  const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
+  m.innerHTML = `<div class="box scroll" style="max-width:760px"><h2 style="margin-bottom:2px">${esc(row.surname)} ${esc(row.name)} <span class="mute small">${esc(row.class)}</span></h2>
+    <div class="mute small" style="margin-bottom:12px">Boshlagan: ${fdt(r.started_at)}${r.finished_at ? ' · Tugatgan: '+fdt(r.finished_at) : ' · hali tugatmagan'}</div>
+    <h3 style="margin:10px 0 6px;font-size:16px">Sahifadan chiqishlar: ${r.leave_count}</h3>
+    ${r.leaves.length ? `<div class="tw" style="max-height:200px"><table><thead><tr><th>№</th><th>Soat</th><th>Nima bo‘ldi</th><th>Qayerda</th><th>Tashqarida</th></tr></thead><tbody>${lv}</tbody></table></div>` : '<p class="mute small" style="margin:0">Chiqish bo‘lmagan.</p>'}
+    ${r.leave_count>=4 ? '<p class="small" style="color:var(--bad);margin:8px 0 0">4-chi chiqishda test avtomatik tugatilgan.</p>' : ''}
+    <h3 style="margin:18px 0 6px;font-size:16px">Har bir savolga sarflangan vaqt</h3>
+    <div class="tw" style="max-height:300px"><table><thead><tr><th>№</th><th>Savol</th><th>Vaqt</th><th>Natija</th></tr></thead><tbody>${it}</tbody></table></div>
+    <p class="mute small" style="margin:8px 0 0">Juda tez (1–3 soniya) va to‘g‘ri javoblar shubhali bo‘lishi mumkin. Telefon qo‘ng‘irog‘i yoki xabar tufayli ham tasodifiy chiqish yozilishi mumkin.</p>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" data-act="alog-close">Yopish</button></div></div>`;
+  document.body.appendChild(m);
 }
 function paneQa(){
   const pane = $('#pane'); if(!pane) return;
@@ -668,10 +796,11 @@ function csvQa(){
   a.download = 'savollar_tahlili_' + (A.f.cls || 'hammasi') + (A.f.grp ? '_g'+A.f.grp : '') + '_test' + (test ? test.id : '') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
 }
 function paneTests(){
-  $('#pane').innerHTML = `<div class="panel"><h2 style="margin-bottom:12px">Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Topshirish oralig‘i</th><th>Xatolar tahlili</th><th>Holat</th><th></th></tr></thead><tbody>
+  $('#pane').innerHTML = `<div class="panel"><h2 style="margin-bottom:12px">Testlar</h2><div class="tw"><table><thead><tr><th>№</th><th>Sinf</th><th>Nomi</th><th>Bazadagi savollar</th><th>Har o‘quvchiga</th><th>Vaqt</th><th>Topshirish oralig‘i</th><th>Xatolar tahlili</th><th>Nazorat</th><th>Holat</th><th></th></tr></thead><tbody>
     ${A.tests.map(x => `<tr><td class="n">${x.id}</td><td>${x.grade}</td><td>${esc(x.title_uz)}</td><td class="n">${x.bank}</td><td class="n">${Math.min(x.question_count,x.bank)}</td><td class="n">${x.duration_min===null ? 'Cheklanmagan' : x.duration_min+' daq'}</td>
     <td>${x.opens_at||x.closes_at ? (x.opens_at ? fdt(x.opens_at) : '…')+' – '+(x.closes_at ? fdt(x.closes_at) : '…') : '<span class="mute">Istalgan vaqt</span>'}</td>
     <td>${x.show_review ? '<span class="badge b-ok">Yoqilgan</span>' : '<span class="badge b-new">Faqat ball</span>'}</td>
+    <td>${x.guard ? '<span class="badge b-ok">Yoqilgan</span>' : '<span class="badge b-new">O‘chiq</span>'}</td>
     <td>${x.active ? '<span class="badge b-ok">Ochiq</span>' : '<span class="badge b-new">Yopiq</span>'}</td>
     <td><div class="row" style="flex-wrap:nowrap"><button class="btn sec sm" data-act="tset" data-id="${x.id}">Sozlash</button><button class="btn sec sm" data-act="toggle" data-id="${x.id}" data-v="${x.active?0:1}">${x.active?'Yopish':'Ochish'}</button></div></td></tr>`).join('')}
     </tbody></table></div><p class="mute small" style="margin-bottom:0">“Sozlash” tugmasi bilan test vaqtini, topshirish oralig‘ini va xatolar tahlilini o‘zgartirasiz. Yopiq testni o‘quvchilar ko‘rmaydi. Yangi testlar (yangi mavzular) bazaga SQL orqali qo‘shiladi.</p></div>`;
@@ -709,6 +838,8 @@ function openTset(id){
     <div class="small mute" style="margin-top:6px">Qachongacha vaqti o‘tgach, test avtomatik yakunlanadi. Oraliq tugashiga kam qolganda boshlagan o‘quvchiga qolgan vaqt beriladi.</div>
     <label style="margin-top:18px">Test tugagach o‘quvchi nimani ko‘radi</label>
     <select id="st-rev"><option value="0" ${x.show_review?'':'selected'}>Faqat ball</option><option value="1" ${x.show_review?'selected':''}>Ball + xatolar tahlili (o‘z javobi va to‘g‘ri javob)</option></select>
+    <label style="margin-top:18px">Nazorat (sahifadan chiqishni kuzatish)</label>
+    <select id="st-guard"><option value="1" ${x.guard?'selected':''}>Yoqilgan: 3 ogohlantirish, 4-chisida test tugaydi</option><option value="0" ${x.guard?'':'selected'}>O‘chiq</option></select>
     <div class="row" style="justify-content:flex-end;margin-top:20px"><button class="btn sec" data-act="tset-cancel">Bekor qilish</button><button class="btn" data-act="tset-save" data-id="${x.id}">Saqlash</button></div></div>`;
   document.body.appendChild(m); tsetSync();
 }
@@ -722,7 +853,7 @@ async function saveTset(id){
     if(o && c && Date.parse(c) <= Date.parse(o)){ toast('“Qachongacha” vaqti “Qachondan” dan keyin bo‘lsin.', true); return; }
   }
   try{
-    const r = await rpc('admin_update_test', { p_user:A.u, p_password:A.p, p_test_id:id, p_show_review:$('#st-rev').value==='1', p_opens_at:o, p_closes_at:c, p_duration_min:dur });
+    const r = await rpc('admin_update_test', { p_user:A.u, p_password:A.p, p_test_id:id, p_show_review:$('#st-rev').value==='1', p_opens_at:o, p_closes_at:c, p_duration_min:dur, p_guard:$('#st-guard').value==='1' });
     if(!r.ok){ toast('Saqlanmadi: ' + (r.error==='bad_window' ? 'vaqt oralig‘i noto‘g‘ri' : r.error==='bad_duration' ? 'daqiqa noto‘g‘ri' : 'xatolik'), true); return; }
     document.querySelectorAll('.modal').forEach(m => m.remove());
     await adminLoad(); A.msg = { t:'Sozlamalar saqlandi.' }; viewAdmin();
@@ -732,9 +863,9 @@ function csv(){
   const rows = shownRows();
   const test = A.tests.find(x => String(x.id)===A.f.test);
   const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
-  const lines = [['№','Familiya','Ism','Sinf','Guruh','Login','Holat','To\'g\'ri','Jami','Foiz','Baho'].map(q).join(',')];
+  const lines = [['№','Familiya','Ism','Sinf','Guruh','Login','Holat','To\'g\'ri','Jami','Foiz','Baho','Vaqt (daq:son)','Chiqishlar'].map(q).join(',')];
   rows.forEach((r,i) => lines.push([i+1,r.surname,r.name,r.class,r.grp,r.login,{done:'Topshirdi',in_progress:'Jarayonda',new:'Boshlamadi'}[r.status],
-    r.correct ?? '', r.total ?? '', r.status==='done' ? Math.round(100*r.correct/r.total) : '', r.status==='done' ? baho(r.correct,r.total) : ''].map(q).join(',')));
+    r.correct ?? '', r.total ?? '', r.status==='done' ? Math.round(100*r.correct/r.total) : '', r.status==='done' ? baho(r.correct,r.total) : '', r.status==='done' && r.spent_sec!=null ? fmtMin(r.spent_sec) : '', r.status!=='new' ? (r.leaves||0) : ''].map(q).join(',')));
   const blob = new Blob(['﻿' + lines.join('\r\n')], { type:'text/csv;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'natijalar_' + (A.f.cls || 'hammasi') + '_test' + (test ? test.id : '') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -788,6 +919,10 @@ document.addEventListener('click', async e => {
     case 'refresh': if(await adminLoad()) paneRes(true); break;
     case 'sort': { const k = b.dataset.k; if(A.sort.k===k) A.sort.d = -A.sort.d; else A.sort = { k, d:1 }; paneRes(true); break; }
     case 'csv': csv(); break;
+    case 'alog': openLog(b.dataset.s, b.dataset.t); break;
+    case 'alog-close': document.querySelectorAll('.modal').forEach(m => m.remove()); break;
+    case 'warn-ok': { if(G.fs && !document.fullscreenElement) enterFs(); closeWarn(); break; }
+    case 'ended-ok': document.querySelectorAll('.modal').forEach(m => m.remove()); viewResult(); break;
     case 'tset': openTset(Number(b.dataset.id)); break;
     case 'tset-cancel': document.querySelectorAll('.modal').forEach(m => m.remove()); break;
     case 'tset-save': saveTset(Number(b.dataset.id)); break;
