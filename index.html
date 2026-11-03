@@ -176,6 +176,9 @@ body.testing,body.testing *{-webkit-user-select:none;user-select:none;-webkit-to
 .guardb{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:no-preference){.warn.l2 .box{animation:shk .45s}.warn.l3 .box,.warn.end .box{animation:shk .7s}}
 @keyframes shk{0%,100%{transform:none}15%{transform:translateX(-10px)}30%{transform:translateX(9px)}45%{transform:translateX(-7px)}60%{transform:translateX(5px)}80%{transform:translateX(-2px)}}
+#pa{display:none}
+.pwv{font-family:Consolas,"Courier New",monospace;font-weight:700}
+@media print{body.printing #app,body.printing #toasts,body.printing .modal{display:none!important}body.printing #pa{display:block}body.printing{background:#fff!important;color:#000}@page{size:A4;margin:10mm}}
 @media print{body.testing #app{display:none!important}.top,.tabs,.filters,.btn,#toasts{display:none!important}body{background:#fff}}
 </style>
 </head>
@@ -285,7 +288,7 @@ function langSwitch(){
 const S = { creds:null, student:null, tests:[], att:null, idx:0, ans:{}, deadline:0, timer:null, saveT:null, busy:false, result:null, w5:false, w1:false };
 const G = { poll:null, on:false, away:false, t0:0, startedAt:0, fs:false, leaveP:null, ended:false, wt:null };
 const WARN_MAX = 3;
-const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null, qa:{ rows:null, key:'', sort:'pct' } };
+const A = { u:null, p:null, rows:[], tests:[], tab:'res', f:{ test:'', cls:'', grp:'', st:'', q:'' }, sort:{ k:'', d:1 }, poll:null, msg:null, qa:{ rows:null, key:'', sort:'pct' }, lg:{ rows:null, f:{ cls:'', grp:'', q:'' }, show:false } };
 
 const p2 = n => String(n).padStart(2,'0');
 function fdt(iso){ const d = new Date(iso); return p2(d.getDate())+'.'+p2(d.getMonth()+1)+'.'+d.getFullYear()+' '+p2(d.getHours())+':'+p2(d.getMinutes()); }
@@ -646,12 +649,12 @@ function baho(c,tot){ if(!tot) return ''; const p = 100*c/tot; return p>=86?5 : 
 function viewAdmin(){
   clearTimers();
   app.className = 'wrap wide';
-  const tabs = [['res','Natijalar'],['qa','Savollar tahlili'],['tests','Testlar'],['set','Sozlamalar']].map(([k,n]) => `<button data-act="atab" data-v="${k}" class="${A.tab===k?'on':''}">${n}</button>`).join('');
+  const tabs = [['res','Natijalar'],['qa','Savollar tahlili'],['lg','Login/parollar'],['tests','Testlar'],['set','Sozlamalar']].map(([k,n]) => `<button data-act="atab" data-v="${k}" class="${A.tab===k?'on':''}">${n}</button>`).join('');
   app.innerHTML = `<div class="top">${brand("O'qituvchi paneli")}<div class="row tools"><span class="mute small">${esc(A.u)}</span>${themeBtn()}<button class="btn sec sm" data-act="alogout">Chiqish</button></div></div>
     <div class="tabs">${tabs}</div><div id="pane"></div>`;
   if(A.msg){ toast(A.msg.t, A.msg.bad); A.msg = null; }
   if(A.tab==='res'){ paneRes(); A.poll = setInterval(async () => { if(await adminLoad()) { paneRes(true); } }, 30000); }
-  else if(A.tab==='qa') paneQa(); else if(A.tab==='tests') paneTests(); else paneSet();
+  else if(A.tab==='qa') paneQa(); else if(A.tab==='lg') paneLg(); else if(A.tab==='tests') paneTests(); else paneSet();
 }
 /* test, sinf va guruh bo'yicha tanlangan qatorlar */
 function baseRows(){
@@ -752,6 +755,115 @@ function qaRows(){
 function topWrong(r){
   const w = r.options.filter(o => !o.ok && o.n>0).sort((a,b) => b.n-a.n)[0];
   return w || null;
+}
+/* ---------- Login / parollar ---------- */
+async function lgLoad(){
+  A.lg.rows = null; paneLg();
+  try{
+    const r = await rpc('admin_students', { p_user:A.u, p_password:A.p });
+    A.lg.rows = r.ok ? r.rows : [];
+  }catch(e){ A.lg.rows = []; toast('Aloqa xatosi. 10_loginlar.sql Supabase’da Run qilinganmi?', true); }
+  if(A.tab==='lg') paneLg();
+}
+function lgRows(){
+  let rows = (A.lg.rows || []).slice();
+  const f = A.lg.f;
+  if(f.cls) rows = rows.filter(r => r.class===f.cls);
+  if(f.grp) rows = rows.filter(r => String(r.grp)===f.grp);
+  const q = f.q.trim().toLowerCase();
+  if(q) rows = rows.filter(r => (r.surname+' '+r.name+' '+r.login).toLowerCase().includes(q));
+  return rows;
+}
+function lgTitle(){ return 'Informatika testi — login va parollar' + (A.lg.f.cls ? ', ' + A.lg.f.cls : ', barcha sinflar') + (A.lg.f.grp ? ', ' + A.lg.f.grp + '-guruh' : ''); }
+function paneLg(){
+  const pane = $('#pane'); if(!pane) return;
+  if(A.lg.rows === null){ pane.innerHTML = `<div class="panel">${tu('loading')}</div>`; if(!A.lg.loading){ A.lg.loading = true; lgLoad().finally(() => { A.lg.loading = false; }); } return; }
+  const ae = document.activeElement, fkey = ae && ae.dataset ? ae.dataset.lf : null, fpos = ae ? ae.selectionStart : null;
+  const all = A.lg.rows, f = A.lg.f;
+  const classes = [...new Set(all.map(r => r.class))].sort();
+  const groups = [...new Set(all.filter(r => !f.cls || r.class===f.cls).map(r => r.grp))].filter(g => g!=null).sort();
+  const rows = lgRows();
+  const noPw = rows.filter(r => !r.pw).length;
+  const body = rows.map((r,i) => `<tr><td class="n">${i+1}</td><td>${esc(r.surname)} ${esc(r.name)}</td><td>${esc(r.class)}</td><td>${r.grp ?? ''}</td>
+    <td class="pwv">${esc(r.login)}</td><td class="pwv">${r.pw ? (A.lg.show ? esc(r.pw) : '••••••') : '<span class="mute">—</span>'}</td>
+    <td><button class="btn sec sm" data-act="lgpw" data-id="${r.id}">Parolni o‘zgartirish</button></td></tr>`).join('');
+  pane.innerHTML = `
+    <div class="filters">
+      <div><label>Sinf</label><select data-lf="cls"><option value="">Hammasi</option>${classes.map(c => `<option ${c===f.cls?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+      <div><label>Guruh</label><select data-lf="grp"><option value="">Hammasi</option>${groups.map(g => `<option ${String(g)===f.grp?'selected':''}>${g}</option>`).join('')}</select></div>
+      <div class="grow"><label>Qidirish</label><input type="search" data-lf="q" value="${esc(f.q)}" placeholder="Familiya, ism yoki login" autocomplete="off"></div>
+      <label style="display:flex;gap:8px;align-items:center;margin:0 0 10px;font-weight:500"><input type="checkbox" data-lf="show" ${A.lg.show?'checked':''}> Parollarni ko‘rsatish</label>
+    </div>
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn" data-act="lg-cards">Kartalarni chop etish / PDF</button>
+      <button class="btn sec" data-act="lg-print">Jadvalni chop etish / PDF</button>
+      <button class="btn sec" data-act="lg-csv">Excel (CSV)</button>
+    </div>
+    <div class="figs" style="margin-bottom:16px"><div class="fig"><b>${rows.length}</b><span>Tanlangan o‘quvchi</span></div></div>
+    ${noPw ? `<div class="note">${noPw} ta o‘quvchining paroli ko‘rinmaydi (bazada o‘qiladigan nusxasi yo‘q). Ular uchun “Parolni o‘zgartirish” bilan yangi parol bering.</div>` : ''}
+    <div class="tw"><table><thead><tr><th>№</th><th>F.I.Sh</th><th>Sinf</th><th>Guruh</th><th>Login</th><th>Parol</th><th></th></tr></thead><tbody>${body}</tbody></table>
+    ${rows.length ? '' : '<div class="empty">Bu filtr bo‘yicha o‘quvchi topilmadi.</div>'}</div>
+    <p class="mute small" style="margin-bottom:0">Chop etish oynasida “PDF sifatida saqlash” (Save as PDF) ni tanlasangiz, fayl qilib yuklab olasiz. Kartalar A4 sahifaga 14 tadan joylashadi, qaychi bilan kesiladi.</p>`;
+  if(fkey){ const el = pane.querySelector(`[data-lf="${fkey}"]`); if(el){ el.focus(); try{ if(fpos!=null) el.setSelectionRange(fpos, fpos); }catch(e){} } }
+}
+function printHtml(html){
+  const old = document.getElementById('pa'); if(old) old.remove();
+  const d = document.createElement('div'); d.id = 'pa'; d.innerHTML = html; document.body.appendChild(d);
+  document.body.classList.add('printing');
+  const done = () => { document.body.classList.remove('printing'); const x = document.getElementById('pa'); if(x) x.remove(); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  setTimeout(() => window.print(), 150);
+}
+function lgPrintCards(){
+  const rows = lgRows(); if(!rows.length) return toast('Chop etish uchun o‘quvchi yo‘q.', true);
+  const url = location.origin + location.pathname;
+  const cards = rows.map(r => `<div style="border:1px dashed #777;padding:3.5mm 5mm;height:38mm;box-sizing:border-box;break-inside:avoid;page-break-inside:avoid;overflow:hidden;font:11pt/1.35 Arial,sans-serif;color:#000;background:#fff">
+      <div style="font-size:8.5pt;color:#444">53-maktab · Informatika testi</div>
+      <div style="font-weight:700;font-size:12.5pt;margin:1mm 0 2mm">${esc(r.surname)} ${esc(r.name)} <span style="font-weight:400">· ${esc(r.class)}${r.grp ? ' · '+r.grp+'-gr.' : ''}</span></div>
+      <div>Логин / Login: <b style="font:700 13pt Consolas,'Courier New',monospace">${esc(r.login)}</b></div>
+      <div>Құпиясөз / Parol: <b style="font:700 13pt Consolas,'Courier New',monospace">${r.pw ? esc(r.pw) : '________'}</b></div>
+      <div style="font-size:8pt;color:#444;margin-top:1.5mm">${esc(url)}</div></div>`).join('');
+  printHtml(`<div style="display:grid;grid-template-columns:1fr 1fr">${cards}</div>`);
+}
+function lgPrintTable(){
+  const rows = lgRows(); if(!rows.length) return toast('Chop etish uchun o‘quvchi yo‘q.', true);
+  const td = (v, mono) => `<td style="border:1px solid #444;padding:3px 6px${mono ? ';font-family:Consolas,monospace;font-weight:700' : ''}">${v}</td>`;
+  const tr = rows.map((r,i) => `<tr>${td(i+1)}${td(esc(r.surname)+' '+esc(r.name))}${td(esc(r.class))}${td(r.grp ?? '')}${td(esc(r.login), true)}${td(r.pw ? esc(r.pw) : '—', true)}</tr>`).join('');
+  printHtml(`<div style="font:11pt Arial,sans-serif;color:#000;background:#fff"><h2 style="margin:0 0 8px;font-size:15pt">${esc(lgTitle())}</h2>
+    <table style="width:100%;border-collapse:collapse"><thead><tr>${['№','F.I.Sh','Sinf','Guruh','Login','Parol'].map(h => `<th style="border:1px solid #444;padding:3px 6px;text-align:left;background:#eee">${h}</th>`).join('')}</tr></thead><tbody>${tr}</tbody></table></div>`);
+}
+function lgCsv(){
+  const rows = lgRows(); const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const lines = [['№','Familiya','Ism','Sinf','Guruh','Login','Parol'].map(q).join(',')];
+  rows.forEach((r,i) => lines.push([i+1,r.surname,r.name,r.class,r.grp,r.login,r.pw||''].map(q).join(',')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'login_parollar_' + (A.lg.f.cls || 'hammasi') + (A.lg.f.grp ? '_g'+A.lg.f.grp : '') + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+}
+function lgPwModal(id){
+  const r = (A.lg.rows||[]).find(x => x.id===id); if(!r) return;
+  const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
+  m.innerHTML = `<div class="box"><h2 style="margin-bottom:2px">Parolni o‘zgartirish</h2><div class="mute small">${esc(r.surname)} ${esc(r.name)} · ${esc(r.class)} · <b class="pwv">${esc(r.login)}</b></div>
+    <label>Yangi parol (kamida 4 belgi)</label>
+    <div class="row" style="flex-wrap:nowrap"><input type="text" id="lgnew" autocomplete="off" value="${esc(r.pw||'')}" style="font-family:Consolas,monospace;font-weight:700"><button class="btn sec" data-act="lg-rand" type="button">Tasodifiy</button></div>
+    <div class="small mute" style="margin-top:8px">Saqlangach o‘quvchining eski paroli ishlamaydi, unga yangi kartani berishingiz kerak.</div>
+    <div class="row" style="justify-content:flex-end;margin-top:18px"><button class="btn sec" data-act="alog-close">Bekor qilish</button><button class="btn" data-act="lg-save" data-id="${id}">Saqlash</button></div></div>`;
+  document.body.appendChild(m); const i = $('#lgnew'); i.focus(); i.select();
+}
+function randPw(){
+  const L = 'abcdefghjkmnpqrstuvwxyz', D = '23456789'; const a = new Uint32Array(6);
+  for(;;){ crypto.getRandomValues(a); const p = Array.from(a, v => (L+D)[v % (L.length+D.length)]).join('');
+    if([...p].filter(c => D.includes(c)).length >= 2 && [...p].filter(c => L.includes(c)).length >= 2) return p; }
+}
+async function lgSave(id){
+  const v = $('#lgnew').value.trim();
+  if(v.length < 4) return toast('Parol kamida 4 belgi bo‘lsin.', true);
+  try{
+    const r = await rpc('admin_set_student_password', { p_user:A.u, p_password:A.p, p_student_id:id, p_new:v });
+    if(!r.ok) return toast('Saqlanmadi.', true);
+    const row = A.lg.rows.find(x => x.id===id); if(row) row.pw = v;
+    document.querySelectorAll('.modal').forEach(m => m.remove()); toast('Parol o‘zgartirildi.'); paneLg();
+  }catch(e){ toast('Aloqa xatosi', true); }
 }
 const fmtMin = sec => Math.floor(sec/60) + ':' + p2(Math.round(sec)%60);
 const ftime = iso => { const d = new Date(iso); return p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds()); };
@@ -909,6 +1021,8 @@ document.addEventListener('submit', async e => {
   }
 });
 document.addEventListener('change', e => {
+  const lf = e.target.dataset && e.target.dataset.lf;
+  if(lf && lf !== 'q'){ if(lf === 'show') A.lg.show = e.target.checked; else { A.lg.f[lf] = e.target.value; if(lf==='cls') A.lg.f.grp = ''; } return paneLg(); }
   if(e.target.id && e.target.id.startsWith('st-')) return tsetSync();
   const qf = e.target.dataset && e.target.dataset.qf;
   if(qf){ if(qf==='sort'){ A.qa.sort = e.target.value; return paneQa(); }
@@ -917,6 +1031,7 @@ document.addEventListener('change', e => {
   A.f[f] = e.target.value; if(f==='cls') A.f.grp = ''; paneRes();
 });
 document.addEventListener('input', e => {
+  if(e.target.dataset && e.target.dataset.lf==='q'){ A.lg.f.q = e.target.value; return paneLg(); }
   if(e.target.dataset && e.target.dataset.f==='q'){ A.f.q = e.target.value; paneRes(); }
 });
 document.addEventListener('click', async e => {
@@ -944,6 +1059,12 @@ document.addEventListener('click', async e => {
     case 'refresh': if(await adminLoad()) paneRes(true); break;
     case 'sort': { const k = b.dataset.k; if(A.sort.k===k) A.sort.d = -A.sort.d; else A.sort = { k, d:1 }; paneRes(true); break; }
     case 'csv': csv(); break;
+    case 'lg-cards': lgPrintCards(); break;
+    case 'lg-print': lgPrintTable(); break;
+    case 'lg-csv': lgCsv(); break;
+    case 'lgpw': lgPwModal(Number(b.dataset.id)); break;
+    case 'lg-rand': { const i = $('#lgnew'); if(i) i.value = randPw(); break; }
+    case 'lg-save': lgSave(Number(b.dataset.id)); break;
     case 'alog': openLog(b.dataset.s, b.dataset.t); break;
     case 'alog-close': document.querySelectorAll('.modal').forEach(m => m.remove()); break;
     case 'warn-ok': { if(G.fs && !document.fullscreenElement) enterFs(); closeWarn(); break; }
